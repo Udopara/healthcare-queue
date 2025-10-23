@@ -1,5 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
+
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 import { sequelize } from "./src/models/index.js";
 import customerRoutes from "./src/routes/customer.routes.js";
 
@@ -16,6 +19,19 @@ app.use(express.json());
     console.error("DB connection failed:", err);
   }
 })();
+
+const specs = swaggerJsdoc({
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "MediQueue API",
+      version: "1.0.0",
+    },
+  },
+  apis: ["./src/routes/*.js"],
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 
 app.get("/", (req, res) => {
