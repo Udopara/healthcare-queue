@@ -1,9 +1,14 @@
 import dotenv from "dotenv";
 import express from "express";
+
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 import { sequelize } from "./src/models/index.js";
+import customerRoutes from "./src/routes/customer.routes.js";
 
 dotenv.config();
 const app = express();
+app.use(express.json());
 
 (async () => {
   try {
@@ -15,12 +20,27 @@ const app = express();
   }
 })();
 
+const specs = swaggerJsdoc({
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "MediQueue API",
+      version: "1.0.0",
+    },
+  },
+  apis: ["./src/routes/*.js"],
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.use("/api/customers", customerRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(3000, () =>
   console.log("Server running on port " + PORT)
 );
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});

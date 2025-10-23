@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { faker } from "@faker-js/faker";
 import {
   sequelize,
-  User,
+  Clinic,
   Queue,
   Customer,
   Ticket,
@@ -18,22 +18,22 @@ dotenv.config();
     await sequelize.sync({ force: true });
     console.log("Database synced — all tables dropped and recreated.");
 
-    // =============== 1️⃣ Create Clinics (Users) ===============
-    const users = [];
+    // =============== 1️⃣ Create Clinics (clinics) ===============
+    const clinics = [];
     for (let i = 0; i < 3; i++) {
-      const clinic = await User.create({
+      const clinic = await Clinic.create({
         clinic_name: faker.company.name(),
         email: faker.internet.email().toLowerCase(),
         phone_number: faker.phone.number("###-###-####"),
         password: "password123",
       });
-      users.push(clinic);
+      clinics.push(clinic);
     }
-    console.log(`Created ${users.length} clinics`);
+    console.log(`Created ${clinics.length} clinics`);
 
     // =============== 2️⃣ Create Queues ===============
     const queues = [];
-    for (const user of users) {
+    for (const clinic of clinics) {
       const queueCount = faker.number.int({ min: 2, max: 4 });
       for (let i = 0; i < queueCount; i++) {
         const queue = await Queue.create({
@@ -44,7 +44,7 @@ dotenv.config();
             "Lab Tests",
             "Eye Screening",
           ]),
-          user_id: user.user_id,
+          clinic_id: clinic.clinic_id,
         });
         queues.push(queue);
       }

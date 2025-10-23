@@ -19,7 +19,7 @@ export default (sequelize) => {
         type: ENUM("open", "closed", "paused"),
         defaultValue: "open",
       },
-      user_id: {
+      clinic_id: {
         type: INTEGER,
         allowNull: false,
       },
