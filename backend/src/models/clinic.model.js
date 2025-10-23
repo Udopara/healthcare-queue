@@ -4,10 +4,10 @@ import { DataTypes } from "sequelize";
 const { STRING, INTEGER, DATE, NOW, VIRTUAL } = DataTypes;
 
 export default (sequelize) => {
-  const User = sequelize.define(
-    "User",
+  const Clinic = sequelize.define(
+    "Clinic",
     {
-      user_id: {
+      clinic_id: {
         type: INTEGER,
         autoIncrement: true,
         primaryKey: true,
@@ -52,14 +52,14 @@ export default (sequelize) => {
       },
     },
     {
-      tableName: "User",
+      tableName: "Clinic",
       timestamps: false,
     }
   );
 
-  User.prototype.confirmPassword = function (password) {
+  Clinic.prototype.confirmPassword = function (password) {
     return bcrypt.compare(password, this.password_hash);
   };
 
-  return User;
+  return Clinic;
 };
