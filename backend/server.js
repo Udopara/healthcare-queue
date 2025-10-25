@@ -5,6 +5,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { sequelize } from "./src/models/index.js";
 import customerRoutes from "./src/routes/customer.routes.js";
+import queueRoutes from "./src/routes/queue.routes.js";
 
 dotenv.config();
 const app = express();
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/customers", customerRoutes);
+app.use("api/queues", queueRoutes)
 
 const PORT = process.env.PORT || 3000;
 app.listen(3000, () =>
