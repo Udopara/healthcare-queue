@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/customers", customerRoutes);
-app.use("api/queues", queueRoutes)
+app.use("/api/queues", queueRoutes)
 
 const PORT = process.env.PORT || 3000;
 app.listen(3000, () =>

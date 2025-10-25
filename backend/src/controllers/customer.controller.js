@@ -1,4 +1,3 @@
-import { where } from "sequelize";
 import { Customer } from "../models/index.js";
 
 export const getAllCustomers = async (req, res) => {
