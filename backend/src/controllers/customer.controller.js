@@ -41,42 +41,6 @@ export const getCustomerById = async (req, res) => {
   }
 };
 
-export const createCustomer = async (req, res) => {
-  try {
-    const { full_name, email, phone_number, password } = req.body;
-
-    if (!full_name || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Full name, email, and password are required." });
-    }
-
-    const existingCustomer = await Customer.findOne({ where: { email } });
-    if (existingCustomer) {
-      return res.status(400).json({ message: "Email already registered." });
-    }
-
-    const newCustomer = await Customer.create({
-      full_name,
-      email,
-      phone_number,
-      password,
-    });
-
-    return res.status(201).json({
-      message: "Customer created successfully.",
-      customer: {
-        id: newCustomer.customer_id,
-        full_name: newCustomer.full_name,
-        email: newCustomer.email,
-        phone_number: newCustomer.phone_number,
-      },
-    });
-  } catch (error) {
-    console.error("Error creating customer:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
 
 export const updateCustomer = async (req, res) => {
   try {

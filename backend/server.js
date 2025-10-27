@@ -4,6 +4,7 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { sequelize } from "./src/models/index.js";
+import clinicRoutes from "./src/routes/clinic.routes.js";
 import customerRoutes from "./src/routes/customer.routes.js";
 import queueRoutes from "./src/routes/queue.routes.js";
 import authRoutes from "./src/routes/auth.routes.js";
@@ -41,6 +42,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/customers", customerRoutes);
+app.use("/api/clinics", clinicRoutes);
 app.use("/api/queues", queueRoutes)
 app.use("/api/auth", authRoutes);
 
