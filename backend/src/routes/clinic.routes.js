@@ -1,109 +1,93 @@
 import express from "express";
-import { getAllCustomers, updateCustomer, deleteCustomer, getCustomerById } from "../controllers/customer.controller.js";
+import {
+  deleteClinic,
+  getAllClinics,
+  getClinicById,
+  updateClinic,
+} from "../controllers/clinic.controller.js";
 
 const router = express.Router();
 
 /**
  * @swagger
  * tags:
- *   name: Customers
- *   description: Manage customer registrations
+ *   name: Clinics
+ *   description: Manage clinic registrations
  *
  * components:
  *   schemas:
- *     Customer:
+ *     Clinic:
  *       type: object
  *       properties:
- *         customer_id:
+ *         clinic_id:
  *           type: integer
  *           description: Unique identifier.
  *           example: 1
- *         full_name:
+ *         clinic_name:
  *           type: string
- *           description: Full name of the customer.
- *           example: Jane Doe
+ *           description: Clinic name.
+ *           example: Kigali Health Center
  *         email:
  *           type: string
  *           format: email
- *           description: Email address of the customer.
- *           example: jane@example.com
+ *           description: Email address of the clinic.
+ *           example: contact@kigalihc.com
  *         phone_number:
  *           type: string
  *           description: Contact phone number.
- *           example: "+250788000111"
+ *           example: "+250788001122"
  *         created_at:
  *           type: string
  *           format: date-time
- *           description: Timestamp when the customer was created.
+ *           description: Timestamp when the clinic was created.
  *           example: "2024-05-01T08:30:00.000Z"
- *     CustomerPayload:
+ *     ClinicPayload:
  *       type: object
  *       properties:
  *         id:
  *           type: integer
  *           example: 1
- *         full_name:
+ *         clinic_name:
  *           type: string
- *           example: Jane Doe
+ *           example: Kigali Health Center
  *         email:
  *           type: string
  *           format: email
- *           example: jane@example.com
+ *           example: contact@kigalihc.com
  *         phone_number:
  *           type: string
- *           example: "+250788000111"
- *     CustomerInput:
+ *           example: "+250788001122"
+ *     ClinicUpdateInput:
  *       type: object
- *       required:
- *         - full_name
- *         - email
- *         - password
  *       properties:
- *         full_name:
+ *         clinic_name:
  *           type: string
- *           example: Jane Doe
+ *           example: Kigali Health Center
  *         email:
  *           type: string
  *           format: email
- *           example: jane@example.com
+ *           example: contact@kigalihc.com
  *         phone_number:
  *           type: string
- *           example: "+250788000111"
+ *           example: "+250788001122"
  *         password:
  *           type: string
  *           format: password
- *           example: mypassword123
- *     CustomerUpdateInput:
- *       type: object
- *       properties:
- *         full_name:
- *           type: string
- *           example: Jane Doe
- *         email:
- *           type: string
- *           format: email
- *           example: jane@example.com
- *         phone_number:
- *           type: string
- *           example: "+250788000111"
- *         password:
- *           type: string
- *           format: password
- *           example: anotherPassword456
- *     CustomerResult:
+ *           example: AnotherStrongPassword456
+ *     ClinicResult:
  *       type: object
  *       properties:
  *         message:
  *           type: string
- *           example: Customer created successfully.
- *         customer:
- *           $ref: "#/components/schemas/CustomerPayload"
+ *           example: Clinic updated successfully.
+ *         clinic:
+ *           $ref: "#/components/schemas/ClinicPayload"
  *     MessageResponse:
  *       type: object
  *       properties:
  *         message:
  *           type: string
- *           example: Customer deleted successfully
+ *           example: Clinic deleted successfully
  *   responses:
  *     NotFound:
  *       description: The requested resource was not found.
@@ -114,17 +98,7 @@ const router = express.Router();
  *             properties:
  *               message:
  *                 type: string
- *                 example: Customer not found
- *     ValidationError:
- *       description: Missing or invalid fields were supplied.
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               message:
- *                 type: string
- *                 example: Full name, email, and password are required.
+ *                 example: Clinic not found
  *     ServerError:
  *       description: Unexpected server error.
  *       content:
@@ -139,101 +113,101 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/customers:
+ * /api/clinics:
  *   get:
- *     summary: Get all customers
- *     description: Retrieve a list of all customers from the system.
- *     tags: [Customers]
+ *     summary: Get all clinics
+ *     description: Retrieve a list of all clinics from the system.
+ *     tags: [Clinics]
  *     responses:
  *       200:
- *         description: A list of customers.
+ *         description: A list of clinics.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: "#/components/schemas/Customer"
+ *                 $ref: "#/components/schemas/Clinic"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/", getAllCustomers);
+router.get("/", getAllClinics);
 
 /**
  * @swagger
- * /api/customers/{id}:
+ * /api/clinics/{id}:
  *   get:
- *     summary: Get a customer by ID
- *     tags: [Customers]
+ *     summary: Get a clinic by ID
+ *     tags: [Clinics]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: The customer identifier.
+ *         description: The clinic identifier.
  *     responses:
  *       200:
- *         description: Customer retrieved successfully.
+ *         description: Clinic retrieved successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Customer"
+ *               $ref: "#/components/schemas/Clinic"
  *       404:
  *         $ref: "#/components/responses/NotFound"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/:id", getCustomerById);
+router.get("/:id", getClinicById);
 
 /**
  * @swagger
- * /api/customers/{id}:
+ * /api/clinics/{id}:
  *   put:
- *     summary: Update an existing customer
- *     tags: [Customers]
+ *     summary: Update an existing clinic
+ *     tags: [Clinics]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: The customer identifier.
+ *         description: The clinic identifier.
  *     requestBody:
  *       required: false
  *       content:
  *         application/json:
  *           schema:
- *             $ref: "#/components/schemas/CustomerUpdateInput"
+ *             $ref: "#/components/schemas/ClinicUpdateInput"
  *     responses:
  *       200:
- *         description: Customer updated successfully.
+ *         description: Clinic updated successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/CustomerResult"
+ *               $ref: "#/components/schemas/ClinicResult"
  *       404:
  *         $ref: "#/components/responses/NotFound"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.put("/:id", updateCustomer);
+router.put("/:id", updateClinic);
 
 /**
  * @swagger
- * /api/customers/{id}:
+ * /api/clinics/{id}:
  *   delete:
- *     summary: Delete a customer
- *     tags: [Customers]
+ *     summary: Delete a clinic
+ *     tags: [Clinics]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: The customer identifier.
+ *         description: The clinic identifier.
  *     responses:
  *       200:
- *         description: Customer deleted successfully.
+ *         description: Clinic deleted successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -243,7 +217,6 @@ router.put("/:id", updateCustomer);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.delete("/:id", deleteCustomer);
-
+router.delete("/:id", deleteClinic);
 
 export default router;
