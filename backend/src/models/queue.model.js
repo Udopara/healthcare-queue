@@ -23,6 +23,10 @@ export default (sequelize) => {
         type: INTEGER,
         allowNull: false,
       },
+      current_ticket_number: {
+        type: STRING(20),
+        defaultValue: null,
+      },
       created_at: {
         type: DATE,
         defaultValue: NOW,

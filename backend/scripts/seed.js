@@ -71,15 +71,10 @@ dotenv.config();
       const randomCustomer = faker.helpers.arrayElement(customers);
 
       const ticket = await Ticket.create({
-        ticket_number: faker.string.alphanumeric({
-          length: 6,
-          casing: "upper",
-        }),
         queue_id: randomQueue.queue_id,
         customer_id: randomCustomer.customer_id,
         notification_contact: randomCustomer.email,
         status: faker.helpers.arrayElement(["waiting", "serving", "completed"]),
-        estimated_wait_time: faker.number.int({ min: 5, max: 60 }),
       });
 
       tickets.push(ticket);
