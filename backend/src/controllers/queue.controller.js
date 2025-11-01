@@ -34,16 +34,16 @@ export const getQueueById = async (req, res) => {
 
 export const createQueue = async (req, res) => {
   try {
-    const { name, clinic_id } = req.body;
+    const { queue_name, clinic_id } = req.body;
 
-    if (!name || !clinic_id) {
+    if (!queue_name || !clinic_id) {
       return res
         .status(400)
-        .json({ message: "Name and clinic_id are required." });
+        .json({ message: "queue_name and clinic_id are required." });
     }
 
     const newQueue = await Queue.create({
-      name,
+      queue_name,
       clinic_id,
     });
 
@@ -74,14 +74,14 @@ export const deleteQueue = async (req, res) => {
 export const updateQueue = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, clinic_id, status } = req.body;
+    const { queue_name, clinic_id, status } = req.body;
 
     const queue = await Queue.findByPk(id);
     if (!queue) {
       return res.status(404).json({ message: "Queue not found" });
     }
 
-    if (name) queue.name = name;
+    if (queue_name) queue.queue_name = queue_name;
     if (clinic_id) queue.clinic_id = clinic_id;
     if (status) queue.status = status;
 

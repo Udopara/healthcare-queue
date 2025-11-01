@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Op } from "sequelize";
 
 const { STRING, INTEGER, DATE, NOW, ENUM } = DataTypes;
 
@@ -7,14 +7,8 @@ export default (sequelize) => {
     "Ticket",
     {
       ticket_id: {
-        type: INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      ticket_number: {
         type: STRING(20),
-        unique: true,
-        allowNull: false,
+        primaryKey: true,
       },
       queue_id: {
         type: INTEGER,
@@ -47,6 +41,33 @@ export default (sequelize) => {
     {
       tableName: "Ticket",
       timestamps: false,
+
+      hooks: {
+        beforeCreate: async (ticket) => {
+          const now = new Date();
+          const month = String(now.getMonth() + 1).padStart(2, "0");
+          const year = String(now.getFullYear()).slice(-2);
+          const prefix = `${ticket.queue_id}-${month}${year}`
+          
+          const lastTicket = await sequelize.models.Ticket.findOne({
+            where: {
+              ticket_id: {
+                [Op.like]: `${prefix}-%`,
+              },
+            },
+            order: [["ticket_id", "DESC"]],
+          });
+
+          let nextSeq = 1;
+          if (lastTicket) {
+            const lastSeq = parseInt(lastTicket.ticket_id.split("-")[2], 10);
+            if (!isNaN(lastSeq)) nextSeq = lastSeq + 1;
+          }
+
+          const formattedSeq = String(nextSeq).padStart(4, "0");
+          ticket.ticket_id = `${prefix}-${formattedSeq}`;
+        },
+      },
     }
   );
 

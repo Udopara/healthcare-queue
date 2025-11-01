@@ -38,10 +38,10 @@ const router = express.Router();
  *     QueueInput:
  *       type: object
  *       required:
- *         - name
+ *         - queue_name
  *         - clinic_id
  *       properties:
- *         name:
+ *         queue_name:
  *           type: string
  *           description: Queue display name.
  *           example: General Consultation
@@ -52,7 +52,7 @@ const router = express.Router();
  *     QueueUpdateInput:
  *       type: object
  *       properties:
- *         name:
+ *         queue_name:
  *           type: string
  *           example: Emergency
  *         clinic_id:
@@ -88,7 +88,7 @@ const router = express.Router();
  *             properties:
  *               message:
  *                 type: string
- *                 example: Name and clinic_id are required.
+ *                 example: queue_name and clinic_id are required.
  *     ServerError:
  *       description: Unexpected server error.
  *       content:

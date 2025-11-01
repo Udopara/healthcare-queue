@@ -100,7 +100,7 @@ export const registerClinic = async (req, res) => {
 };
 
 export const loginCustomer = async (req, res) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
 
   try {
     const customer = await Customer.findOne({ where: { email } });
@@ -108,7 +108,7 @@ export const loginCustomer = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    const validPassword = customer.confirmPassword(req.body.password);
+    const validPassword = customer.confirmPassword(password);
     if (!validPassword) {
       return res.status(401).json({ message: "Invalid password" });
     }
@@ -117,6 +117,7 @@ export const loginCustomer = async (req, res) => {
     const token = createAuthToken({
       id: customerId,
       email: customer.email,
+      role: "customer"
     });
 
     res.json({ token });
@@ -144,6 +145,7 @@ export const loginClinic = async (req, res) => {
     const token = createAuthToken({
       id: clinicId,
       email: clinic.email,
+      role: "clinic"
     });
 
     res.json({ token });
