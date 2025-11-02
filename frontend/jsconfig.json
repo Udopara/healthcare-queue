@@ -1,1 +1,19 @@
-
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "@/components/*": ["components/*"],
+      "@/pages/*": ["pages/*"],
+      "@/layouts/*": ["layouts/*"],
+      "@/services/*": ["services/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/utils/*": ["utils/*"],
+      "@/context/*": ["context/*"],
+      "@/config/*": ["config/*"]
+    },
+    "jsx": "react"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
