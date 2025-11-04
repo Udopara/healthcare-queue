@@ -1,4 +1,6 @@
-import { Ticket, Queue } from "../models/index.js";
+import { Ticket, Queue, Customer } from "../models/index.js";
+import { Op } from "sequelize";
+import { sendNextUpEmail } from "../utils/email.js";
 
 const mapTicketResponse = (ticket) => ({
   id: ticket.ticket_id,
@@ -141,6 +143,87 @@ export const cancelTicket = async (req, res) => {
     });
   } catch (error) {
     console.error("Error cancelling ticket:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateTicketStatusByClinic = async (req, res) => {
+  if (req.user?.role !== "clinic") {
+    return res.status(403).json({ message: "Only clinics can update ticket status" });
+  }
+
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status || !["waiting", "serving", "completed", "cancelled"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  try {
+    const ticket = await Ticket.findByPk(id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    // Ensure the authenticated clinic owns the queue this ticket belongs to
+    const queue = await Queue.findByPk(ticket.queue_id);
+    if (!queue) {
+      return res.status(404).json({ message: "Queue not found" });
+    }
+    if (queue.clinic_id !== req.user.id) {
+      return res.status(403).json({ message: "You do not own this queue" });
+    }
+
+    const previousStatus = ticket.status;
+    ticket.status = status;
+    if (status === "serving") {
+      ticket.served_at = new Date();
+    }
+    await ticket.save();
+
+    // When a ticket starts serving, notify the next waiting ticket in same queue
+    if (previousStatus !== "serving" && status === "serving") {
+      // Update queue's current ticket
+      queue.current_ticket_number = ticket.ticket_id;
+      await queue.save();
+
+      // Find the next waiting ticket by earliest in queue
+      const nextTicket = await Ticket.findOne({
+        where: {
+          queue_id: ticket.queue_id,
+          status: "waiting",
+        },
+        order: [["ticket_id", "ASC"]],
+      });
+
+      if (nextTicket) {
+        let to = null;
+        if (nextTicket.notification_contact?.includes("@")) {
+          to = nextTicket.notification_contact;
+        } else if (nextTicket.customer_id) {
+          const customer = await Customer.findByPk(nextTicket.customer_id);
+          if (customer?.email) to = customer.email;
+        }
+
+        if (to) {
+          try {
+            await sendNextUpEmail(to, {
+              queueName: queue?.queue_name,
+              currentTicketId: ticket.ticket_id,
+            });
+          } catch (mailErr) {
+            console.error("Failed to send next-up email:", mailErr);
+          }
+        }
+      }
+    }
+
+    return res.json({
+      message: "Ticket status updated",
+      ticket: mapTicketResponse(ticket),
+    });
+  } catch (error) {
+    console.error("Error updating ticket status:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

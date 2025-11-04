@@ -4,6 +4,7 @@ import {
   createTicket,
   getTicketByIdForUser,
   getTicketsForUser,
+  updateTicketStatusByClinic,
 } from "../controllers/ticket.controller.js";
 import { authenticateToken } from "../middlewares/auth.js";
 
@@ -287,5 +288,44 @@ router.post("/", createTicket);
  *         $ref: "#/components/responses/ServerError"
  */
 router.delete("/:id", cancelTicket);
+
+/**
+ * @swagger
+ * /api/tickets/{id}/status:
+ *   put:
+ *     summary: Update ticket status (clinic only)
+ *     tags: [Tickets]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [waiting, serving, completed, cancelled]
+ *     responses:
+ *       200:
+ *         description: Ticket status updated.
+ *       401:
+ *         $ref: "#/components/responses/Unauthorized"
+ *       403:
+ *         description: Only clinics can update ticket status
+ *       404:
+ *         $ref: "#/components/responses/NotFound"
+ *       500:
+ *         $ref: "#/components/responses/ServerError"
+ */
+router.put("/:id/status", authenticateToken, updateTicketStatusByClinic);
 
 export default router;

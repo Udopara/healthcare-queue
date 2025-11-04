@@ -4,6 +4,8 @@ import {
   loginCustomer,
   registerClinic,
   registerCustomer,
+  requestPasswordReset,
+  resetPassword,
 } from "../controllers/auth.controller.js";
 const router = express.Router();
 
@@ -216,5 +218,58 @@ router.post("/login/customer", loginCustomer);
  *         $ref: "#/components/responses/ServerError"
  */
 router.post("/login/clinic", loginClinic);
+
+/**
+ * @swagger
+ * /api/auth/password/forgot:
+ *   post:
+ *     summary: Request a password reset link
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Generic response indicating email sent if account exists.
+ */
+router.post("/password/forgot", requestPasswordReset);
+
+/**
+ * @swagger
+ * /api/auth/password/reset:
+ *   post:
+ *     summary: Reset password using a token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password reset successfully.
+ *       400:
+ *         description: Invalid or expired token / bad input.
+ */
+router.post("/password/reset", resetPassword);
 
 export default router;
