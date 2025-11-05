@@ -1,13 +1,17 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Phone, User, Loader2 } from 'lucide-react'
+import AuthLayout from '../../layouts/AuthLayout'
+import { useAuth } from '../../context/AuthContext'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    phoneNumber: '',
+    fullName: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { login } = useAuth()
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -18,111 +22,106 @@ export default function LoginPage() {
     setError('')
   }
 
+  const validatePhoneNumber = (phone) => {
+    // Remove any non-digit characters
+    const cleaned = phone.replace(/\D/g, '')
+    // Check if it's a valid phone number (at least 10 digits)
+    return cleaned.length >= 10
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
+    // Validation
+    if (!formData.phoneNumber.trim()) {
+      setError('Phone number is required')
+      setLoading(false)
+      return
+    }
+
+    if (!validatePhoneNumber(formData.phoneNumber)) {
+      setError('Please enter a valid phone number')
+      setLoading(false)
+      return
+    }
+
+    if (!formData.fullName.trim()) {
+      setError('Full name is required')
+      setLoading(false)
+      return
+    }
+
     try {
-      // TODO: Replace with actual API call
-      // const response = await authService.login(formData)
-      // localStorage.setItem('token', response.token)
-      // localStorage.setItem('user', JSON.stringify(response.user))
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Navigate to admin dashboard
-      navigate('/admin/dashboard')
+      await login(formData.phoneNumber, formData.fullName)
+      navigate('/dashboard/queues')
     } catch (err) {
-      setError(err.message || 'Invalid email or password')
+      setError(err.message || 'Invalid credentials. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="text-center mb-4">
-            <Link 
-              to="/" 
-              className="inline-flex items-center text-sm text-gray-600 hover:text-indigo-600 transition-colors"
-            >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to home
-            </Link>
+    <AuthLayout>
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+            <User className="h-6 w-6 text-indigo-600" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Admin Login
+          <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Sign in to access your queue dashboard
           </p>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+
+        <form className="space-y-5" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
             </div>
           )}
-          
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
+
+          <div>
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+              Phone Number
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Phone className="h-5 w-5 text-gray-400" />
+              </div>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
+                placeholder="Enter your phone number"
+                value={formData.phoneNumber}
                 onChange={handleChange}
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-gray-400" />
+              </div>
               <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                id="fullName"
+                name="fullName"
+                type="text"
+                required
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
+                placeholder="Enter your full name"
+                value={formData.fullName}
+                onChange={handleChange}
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot password?
-              </a>
             </div>
           </div>
 
@@ -130,23 +129,29 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </div>
-
-          <div className="text-center">
-            <span className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link to="/auth/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Register
-              </Link>
-            </span>
-          </div>
         </form>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{' '}
+            <Link to="/auth/register" className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+              Create one now
+            </Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </AuthLayout>
   )
 }
-
