@@ -8,6 +8,7 @@ import ClinicQueues from '../pages/clinic/Queues'
 import ClinicPatients from '../pages/clinic/Patients'
 import ClinicReports from '../pages/clinic/Reports'
 import ClinicSettings from '../pages/clinic/Settings'
+import ClinicNotFound from '../pages/clinic/NotFound'
 
 // Patient Pages
 import PatientDashboard from '../pages/patient/Dashboard'
@@ -16,6 +17,7 @@ import JoinQueue from '../pages/patient/JoinQueue'
 import MyQueues from '../pages/patient/MyQueues'
 import PatientProfile from '../pages/patient/Profile'
 import PatientHelp from '../pages/patient/Help'
+import PatientNotFound from '../pages/patient/NotFound'
 
 // Doctor Pages
 import DoctorDashboard from '../pages/doctor/Dashboard'
@@ -24,6 +26,7 @@ import DoctorQueues from '../pages/doctor/Queues'
 import DoctorAppointments from '../pages/doctor/Appointments'
 import DoctorReports from '../pages/doctor/Reports'
 import DoctorSettings from '../pages/doctor/Settings'
+import DoctorNotFound from '../pages/doctor/NotFound'
 
 // Admin Pages
 import AdminDashboard from '../pages/admin/Dashboard'
@@ -32,6 +35,7 @@ import AdminDoctors from '../pages/admin/Doctors'
 import AdminPatients from '../pages/admin/Patients'
 import AdminReports from '../pages/admin/Reports'
 import AdminSettings from '../pages/admin/Settings'
+import AdminNotFound from '../pages/admin/NotFound'
 
 export default function RoleBasedRoutes() {
   const { user } = useAuth()
@@ -41,6 +45,16 @@ export default function RoleBasedRoutes() {
   }
 
   const role = user.role.toLowerCase()
+  
+  // Get the dashboard route for this role
+  const dashboardRoutes = {
+    clinic: '/clinic/dashboard',
+    patient: '/patient/dashboard',
+    doctor: '/doctor/dashboard',
+    admin: '/admin/dashboard'
+  }
+  
+  const dashboardRoute = dashboardRoutes[role] || '/patient/dashboard'
 
   // Clinic Routes
   if (role === 'clinic') {
@@ -51,7 +65,8 @@ export default function RoleBasedRoutes() {
         <Route path="/clinic/patients" element={<ClinicPatients />} />
         <Route path="/clinic/reports" element={<ClinicReports />} />
         <Route path="/clinic/settings" element={<ClinicSettings />} />
-        <Route path="/clinic/*" element={<Navigate to="/clinic/dashboard" replace />} />
+        <Route path="/clinic/*" element={<ClinicNotFound />} />
+        <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
       </Routes>
     )
   }
@@ -66,7 +81,8 @@ export default function RoleBasedRoutes() {
         <Route path="/patient/my-queues" element={<MyQueues />} />
         <Route path="/patient/profile" element={<PatientProfile />} />
         <Route path="/patient/help" element={<PatientHelp />} />
-        <Route path="/patient/*" element={<Navigate to="/patient/dashboard" replace />} />
+        <Route path="/patient/*" element={<PatientNotFound />} />
+        <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
       </Routes>
     )
   }
@@ -81,7 +97,8 @@ export default function RoleBasedRoutes() {
         <Route path="/doctor/appointments" element={<DoctorAppointments />} />
         <Route path="/doctor/reports" element={<DoctorReports />} />
         <Route path="/doctor/settings" element={<DoctorSettings />} />
-        <Route path="/doctor/*" element={<Navigate to="/doctor/dashboard" replace />} />
+        <Route path="/doctor/*" element={<DoctorNotFound />} />
+        <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
       </Routes>
     )
   }
@@ -96,7 +113,8 @@ export default function RoleBasedRoutes() {
         <Route path="/admin/patients" element={<AdminPatients />} />
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
-        <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/*" element={<AdminNotFound />} />
+        <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
       </Routes>
     )
   }

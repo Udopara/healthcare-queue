@@ -1,7 +1,8 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import ProtectedRoute from '../components/routes/ProtectedRoute'
-import PublicRoute from '../components/routes/PublicRoute'
+import ProtectedRoute from '../components/routes/protectedRoute'
+import PublicRoute from '../components/routes/publicRoute'
+import RootRedirect from '../components/routes/RootRedirect'
 import RoleBasedRoutes from './RoleBasedRoutes'
 
 // Public Pages
@@ -15,8 +16,8 @@ import RegisterPage from '../pages/auth/RegisterPage'
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<HomePage />} />
+      {/* Root route - redirects authenticated users to their dashboard */}
+      <Route path="/" element={<RootRedirect />} />
 
       {/* Auth Routes - Public, but redirect if authenticated */}
       <Route
