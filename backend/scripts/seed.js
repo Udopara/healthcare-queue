@@ -18,7 +18,6 @@ dotenv.config();
     await sequelize.sync({ force: true });
     console.log("Database synced — all tables dropped and recreated.");
 
-    // =============== 1️⃣ Create Clinics (clinics) ===============
     const clinics = [];
     for (let i = 0; i < 3; i++) {
       const clinic = await Clinic.create({
@@ -31,7 +30,6 @@ dotenv.config();
     }
     console.log(`Created ${clinics.length} clinics`);
 
-    // =============== 2️⃣ Create Queues ===============
     const queues = [];
     for (const clinic of clinics) {
       const queueCount = faker.number.int({ min: 2, max: 4 });
@@ -51,20 +49,18 @@ dotenv.config();
     }
     console.log(`Created ${queues.length} queues`);
 
-    // =============== 3️⃣ Create Customers ===============
     const customers = [];
     for (let i = 0; i < 20; i++) {
       const customer = await Customer.create({
         full_name: faker.person.fullName(),
         email: faker.internet.email().toLowerCase(),
         phone_number: faker.phone.number("###-###-####"),
-        password: "secret1234", // 🧠 automatically hashed via virtual field
+        password: "secret1234",
       });
       customers.push(customer);
     }
     console.log(`Created ${customers.length} customers`);
 
-    // =============== 4️⃣ Create Tickets ===============
     const tickets = [];
     for (let i = 0; i < 40; i++) {
       const randomQueue = faker.helpers.arrayElement(queues);
@@ -74,7 +70,7 @@ dotenv.config();
         queue_id: randomQueue.queue_id,
         customer_id: randomCustomer.customer_id,
         notification_contact: randomCustomer.email,
-        status: faker.helpers.arrayElement(["waiting", "serving", "completed"]),
+        status: "waiting",
       });
 
       tickets.push(ticket);
