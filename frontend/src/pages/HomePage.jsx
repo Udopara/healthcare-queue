@@ -13,7 +13,7 @@ export default function HomePage() {
               <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <List className="w-6 h-6 text-white" />
               </div>
-              <span className="ml-3 text-xl font-bold text-gray-900">Queue Generator</span>
+              <span className="ml-3 text-xl font-bold text-gray-900">MediQueue</span>
             </div>
             <div className="flex items-center space-x-4">
               <Link
@@ -37,7 +37,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
           <h1 className="text-5xl font-extrabold text-gray-900 sm:text-6xl md:text-7xl">
-            Welcome to <span className="text-indigo-600">Queue Generator</span>
+            Welcome to <span className="text-indigo-600">MediQueue</span>
           </h1>
           <p className="mt-6 max-w-3xl mx-auto text-xl text-gray-600">
             Efficient healthcare queue management system. Manage patient queues, reduce wait times, and improve healthcare service delivery.
