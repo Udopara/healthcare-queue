@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     initAuth()
   }, [])
 
-  const login = async (phoneNumber, fullName) => {
+  const login = async (phoneNumber, fullName, role = 'patient') => {
     try {
       // TODO: Replace with actual API call
       // const response = await authService.login({ phoneNumber, fullName })
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         id: '1',
         phoneNumber,
         fullName,
-        role: 'patient'
+        role: role || 'patient'
       }
       
       const mockToken = 'mock-jwt-token-' + Date.now()
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const register = async (phoneNumber, fullName) => {
+  const register = async (phoneNumber, fullName, role = 'patient') => {
     try {
       // TODO: Replace with actual API call
       // const response = await authService.register({ phoneNumber, fullName })
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
         id: '1',
         phoneNumber,
         fullName,
-        role: 'patient'
+        role: role || 'patient'
       }
       
       const mockToken = 'mock-jwt-token-' + Date.now()
@@ -87,13 +87,24 @@ export const AuthProvider = ({ children }) => {
     return !!user && !!getToken()
   }
 
+  const getDashboardRoute = (userRole) => {
+    const roleRoutes = {
+      clinic: '/clinic/dashboard',
+      patient: '/patient/dashboard',
+      doctor: '/doctor/dashboard',
+      admin: '/admin/dashboard'
+    }
+    return roleRoutes[userRole] || '/patient/dashboard'
+  }
+
   const value = {
     user,
     loading,
     login,
     register,
     logout,
-    isAuthenticated: isAuthenticated()
+    isAuthenticated: isAuthenticated(),
+    getDashboardRoute
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

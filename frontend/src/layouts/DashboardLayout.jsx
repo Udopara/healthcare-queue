@@ -2,44 +2,94 @@ import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   LayoutDashboard, 
-  List, 
-  User, 
-  Settings, 
+  ListChecks,
+  PlusCircle,
+  Users,
+  BarChart,
+  Settings,
+  HelpCircle,
+  CalendarCheck,
+  Building2,
+  Stethoscope,
   LogOut,
   Menu,
   X,
+  User,
   Search
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Queues', href: '/dashboard/queues', icon: List },
-  { name: 'Profile', href: '/dashboard/profile', icon: User },
-]
-
-const adminNavigation = [
-  ...navigation,
-  { name: 'Admin', href: '/dashboard/admin', icon: Settings },
-]
-
 export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, logout, getDashboardRoute } = useAuth()
   const location = useLocation()
-  const navigate = useNavigate()
   
-  const isAdmin = user?.role === 'admin'
-  const navItems = isAdmin ? adminNavigation : navigation
+  const role = user?.role?.toLowerCase() || 'patient'
+
+  // Role-based navigation configurations
+  const navigationConfig = {
+    clinic: {
+      title: 'Clinic Management Panel',
+      logoHref: '/clinic/dashboard',
+      items: [
+        { name: 'Dashboard', href: '/clinic/dashboard', icon: LayoutDashboard },
+        { name: 'My Queues', href: '/clinic/queues', icon: ListChecks },
+        { name: 'Patients', href: '/clinic/patients', icon: Users },
+        { name: 'Reports', href: '/clinic/reports', icon: BarChart },
+        { name: 'Settings', href: '/clinic/settings', icon: Settings },
+      ]
+    },
+    patient: {
+      title: 'Patient Portal',
+      logoHref: '/patient/dashboard',
+      items: [
+        { name: 'Dashboard', href: '/patient/dashboard', icon: LayoutDashboard },
+        { name: 'Browse Queue', href: '/patient/browse', icon: Search },
+        { name: 'Join Queue', href: '/patient/join', icon: PlusCircle },
+        { name: 'My Queues', href: '/patient/my-queues', icon: ListChecks },
+        { name: 'Profile', href: '/patient/profile', icon: User },
+        { name: 'Help', href: '/patient/help', icon: HelpCircle },
+      ]
+    },
+    doctor: {
+      title: "Doctor's Workspace",
+      logoHref: '/doctor/dashboard',
+      items: [
+        { name: 'Dashboard', href: '/doctor/dashboard', icon: LayoutDashboard },
+        { name: 'Create Queue', href: '/doctor/create-queue', icon: PlusCircle },
+        { name: 'Queue Monitor', href: '/doctor/queues', icon: ListChecks },
+        { name: 'Appointments', href: '/doctor/appointments', icon: CalendarCheck },
+        { name: 'Reports', href: '/doctor/reports', icon: BarChart },
+        { name: 'Settings', href: '/doctor/settings', icon: Settings },
+      ]
+    },
+    admin: {
+      title: 'System Admin Panel',
+      logoHref: '/admin/dashboard',
+      items: [
+        { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'Clinics', href: '/admin/clinics', icon: Building2 },
+        { name: 'Doctors', href: '/admin/doctors', icon: Stethoscope },
+        { name: 'Patients', href: '/admin/patients', icon: Users },
+        { name: 'Reports', href: '/admin/reports', icon: BarChart },
+        { name: 'System Settings', href: '/admin/settings', icon: Settings },
+      ]
+    }
+  }
+
+  const config = navigationConfig[role] || navigationConfig.patient
+  const navItems = config.items
 
   const handleLogout = () => {
     logout()
   }
 
   const isActive = (href) => {
-    if (href === '/dashboard') {
-      return location.pathname === '/dashboard'
+    // Exact match for dashboard
+    if (href.endsWith('/dashboard')) {
+      return location.pathname === href
     }
+    // Prefix match for other routes
     return location.pathname.startsWith(href)
   }
 
@@ -62,9 +112,9 @@ export default function DashboardLayout({ children }) {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <Link to="/dashboard" className="flex items-center">
+            <Link to={config.logoHref} className="flex items-center">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                <List className="w-5 h-5 text-white" />
+                <ListChecks className="w-5 h-5 text-white" />
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900">Queue Generator</span>
             </Link>
@@ -112,8 +162,8 @@ export default function DashboardLayout({ children }) {
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.fullName || 'User'}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.phoneNumber || ''}
+                <p className="text-xs text-gray-500 truncate capitalize">
+                  {user?.role || ''}
                 </p>
               </div>
             </div>
@@ -133,19 +183,27 @@ export default function DashboardLayout({ children }) {
         {/* Top navbar */}
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
-
-            <div className="flex-1 flex items-center justify-end space-x-4">
-              <div className="hidden sm:flex items-center space-x-4">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden text-gray-500 hover:text-gray-700"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              
+              <div className="hidden sm:flex items-center">
                 <div className="text-sm text-gray-600">
                   Welcome, <span className="font-medium text-gray-900">{user?.fullName}</span>
                 </div>
               </div>
+              
+              <h1 className="text-lg font-semibold text-gray-900 lg:hidden">
+                {config.title}
+              </h1>
+            </div>
+
+            <div className="hidden lg:block text-lg font-semibold text-gray-900">
+              {config.title}
             </div>
           </div>
         </header>
@@ -158,4 +216,3 @@ export default function DashboardLayout({ children }) {
     </div>
   )
 }
-

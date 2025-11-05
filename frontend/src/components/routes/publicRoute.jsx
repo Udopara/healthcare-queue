@@ -12,9 +12,9 @@ import { useAuth } from '../../context/AuthContext'
  */
 export default function PublicRoute({ 
   children, 
-  redirectTo = '/dashboard/queues' 
+  redirectTo 
 }) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user, getDashboardRoute } = useAuth()
 
   if (loading) {
     return (
@@ -25,7 +25,8 @@ export default function PublicRoute({
   }
 
   if (isAuthenticated) {
-    return <Navigate to={redirectTo} replace />
+    const dashboardRoute = redirectTo || (user?.role ? getDashboardRoute(user.role) : '/patient/dashboard')
+    return <Navigate to={dashboardRoute} replace />
   }
 
   return children

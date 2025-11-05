@@ -7,11 +7,12 @@ import { useAuth } from '../../context/AuthContext'
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     phoneNumber: '',
-    fullName: ''
+    fullName: '',
+    role: 'patient'
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { register } = useAuth()
+  const { register, getDashboardRoute } = useAuth()
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -61,9 +62,16 @@ export default function RegisterPage() {
       return
     }
 
+    if (!formData.role) {
+      setError('Please select a role')
+      setLoading(false)
+      return
+    }
+
     try {
-      await register(formData.phoneNumber, formData.fullName)
-      navigate('/dashboard/queues')
+      await register(formData.phoneNumber, formData.fullName, formData.role)
+      const dashboardRoute = getDashboardRoute(formData.role)
+      navigate(dashboardRoute)
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.')
     } finally {
@@ -134,6 +142,26 @@ export default function RegisterPage() {
               />
             </div>
             <p className="mt-1 text-xs text-gray-500">We'll use this to notify you about your queue status</p>
+          </div>
+
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+              Role <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="role"
+              name="role"
+              required
+              value={formData.role}
+              onChange={handleChange}
+              className="block w-full pl-3 pr-10 py-3 border border-gray-300 rounded-lg leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
+            >
+              <option value="patient">Patient</option>
+              <option value="clinic">Clinic</option>
+              <option value="doctor">Doctor</option>
+              <option value="admin">Admin</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-500">Select your role for testing purposes</p>
           </div>
 
           <div>
