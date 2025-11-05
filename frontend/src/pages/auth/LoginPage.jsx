@@ -15,9 +15,11 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   const handleChange = (e) => {
+    const { name, value } = e.target
+    const nextValue = name === 'phoneNumber' ? value.replace(/\D/g, '') : value
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: nextValue
     })
     setError('')
   }
@@ -84,29 +86,8 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-              Phone Number
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Phone className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                required
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
-                placeholder="Enter your phone number"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
+              Full Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -120,6 +101,29 @@ export default function LoginPage() {
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
                 placeholder="Enter your full name"
                 value={formData.fullName}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+              Phone Number <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Phone className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                required
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
+                placeholder="Enter your phone number"
+                value={formData.phoneNumber}
                 onChange={handleChange}
               />
             </div>
