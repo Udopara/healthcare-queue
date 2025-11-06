@@ -1,46 +1,58 @@
-import { Customer, Clinic } from "../models/index.js";
+import { User } from "../models/index.js";
 import { createAuthToken } from "../utils.js";
 
-export const registerCustomer = async (req, res) => {
-  const { full_name, email, phone_number, password } = req.body;
+const ALLOWED_ROLES = ["admin", "clinic", "doctor", "patient"];
 
-  if (!full_name || !email || !password) {
+const buildUserPayload = (user) => ({
+  id: user.user_id ?? user.id,
+  name: user.name,
+  email: user.email,
+  phone_number: user.phone_number,
+  role: user.role,
+  linked_entity_id: user.linked_entity_id,
+});
+
+export const register = async (req, res) => {
+  const { name, email, phone_number, password, role } = req.body;
+
+  if (!name || !email || !password || !role) {
     return res
       .status(400)
-      .json({ message: "full_name, email and password are required" });
+      .json({ message: "name, email, password, and role are required" });
+  }
+
+  if (!ALLOWED_ROLES.includes(role)) {
+    return res.status(400).json({ message: "Invalid role supplied" });
   }
 
   try {
-    const existingCustomer = await Customer.findOne({ where: { email } });
-    if (existingCustomer) {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    const customer = await Customer.create({
-      full_name,
+    const user = await User.create({
+      name,
       email,
       phone_number,
       password,
+      role,
     });
 
-    const customerId = customer.customer_id ?? customer.id;
+    const payload = buildUserPayload(user);
     const token = createAuthToken({
-      id: customerId,
-      email: customer.email,
-      role: "customer",
+      id: payload.id,
+      email: payload.email,
+      role: payload.role,
+      linked_entity_id: payload.linked_entity_id,
     });
 
     return res.status(201).json({
       token,
-      customer: {
-        id: customerId,
-        full_name: customer.full_name,
-        email: customer.email,
-        phone_number: customer.phone_number,
-      },
+      user: payload,
     });
   } catch (error) {
-    console.error("Register customer error:", error);
+    console.error("Register user error:", error);
     if (error.name === "SequelizeValidationError") {
       return res
         .status(400)
@@ -50,109 +62,60 @@ export const registerCustomer = async (req, res) => {
   }
 };
 
-export const registerClinic = async (req, res) => {
-  const { clinic_name, email, phone_number, password } = req.body;
-
-  if (!clinic_name || !email || !password) {
-    return res
-      .status(400)
-      .json({ message: "clinic_name, email and password are required" });
-  }
-
-  try {
-    const existingClinic = await Clinic.findOne({ where: { email } });
-    if (existingClinic) {
-      return res.status(409).json({ message: "Email already registered" });
-    }
-
-    const clinic = await Clinic.create({
-      clinic_name,
-      email,
-      phone_number,
-      password,
-    });
-
-    const clinicId = clinic.clinic_id ?? clinic.id;
-    const token = createAuthToken({
-      id: clinicId,
-      email: clinic.email,
-      role: "clinic",
-    });
-
-    return res.status(201).json({
-      token,
-      clinic: {
-        id: clinicId,
-        clinic_name: clinic.clinic_name,
-        email: clinic.email,
-        phone_number: clinic.phone_number,
-      },
-    });
-  } catch (error) {
-    console.error("Register clinic error:", error);
-    if (error.name === "SequelizeValidationError") {
-      return res
-        .status(400)
-        .json({ message: error.errors?.[0]?.message ?? "Validation error" });
-    }
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
-export const loginCustomer = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({ message: "email and password are required" });
+  }
+
   try {
-    const customer = await Customer.findOne({ where: { email } });
-    if (!customer) {
-      return res.status(404).json({ message: "Customer not found" });
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const validPassword = customer.confirmPassword(password);
+    const validPassword = await user.checkPassword(password);
     if (!validPassword) {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    const customerId = customer.customer_id ?? customer.id;
+    const payload = buildUserPayload(user);
     const token = createAuthToken({
-      id: customerId,
-      email: customer.email,
-      role: "customer"
+      id: payload.id,
+      email: payload.email,
+      role: payload.role,
+      linked_entity_id: payload.linked_entity_id,
     });
 
-    res.json({ token });
+    return res.json({
+      token,
+      user: payload,
+    });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
-export const loginClinic = async (req, res) => {
-  const { email } = req.body;
+// TODO: Implement password reset functionality
+
+export const getCurrentUser = async (req, res) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
   try {
-    const clinic = await Clinic.findOne({ where: { email } });
-    if (!clinic) {
-      return res.status(404).json({ message: "Clinic not found" });
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const validPassword = clinic.confirmPassword(req.body.password);
-    if (!validPassword) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
-
-    const clinicId = clinic.clinic_id ?? clinic.id;
-    const token = createAuthToken({
-      id: clinicId,
-      email: clinic.email,
-      role: "clinic"
+    return res.json({
+      user: buildUserPayload(user),
     });
-
-    res.json({ token });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Get current user error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
-
-//TODO: Implement password reset functionality

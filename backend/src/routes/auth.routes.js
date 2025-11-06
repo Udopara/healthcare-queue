@@ -1,17 +1,18 @@
 import express from "express";
 import {
-  loginClinic,
-  loginCustomer,
-  registerClinic,
-  registerCustomer,
+  getCurrentUser,
+  login,
+  register,
 } from "../controllers/auth.controller.js";
+import { authenticateToken } from "../middlewares/auth.js";
+
 const router = express.Router();
 
 /**
  * @swagger
  * tags:
  *   name: Auth
- *   description: Authentication endpoints for customers and clinics
+ *   description: Authentication endpoints for all platform users
  *
  * components:
  *   schemas:
@@ -36,6 +37,47 @@ const router = express.Router();
  *           type: string
  *           description: JSON Web Token for authenticated requests.
  *           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+ *         user:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: integer
+ *             name:
+ *               type: string
+ *             email:
+ *               type: string
+ *             phone_number:
+ *               type: string
+ *             role:
+ *               type: string
+ *               description: Role included in the JWT payload.
+ *               example: patient
+ *     RegisterRequest:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *         - role
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: Jane Doe
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: jane.doe@example.com
+ *         phone_number:
+ *           type: string
+ *           example: "+250781234567"
+ *         role:
+ *           type: string
+ *           enum: [admin, clinic, doctor, patient]
+ *           example: patient
+ *         password:
+ *           type: string
+ *           format: password
+ *           example: StrongPassword123
  *     MessageResponse:
  *       type: object
  *       properties:
@@ -62,7 +104,7 @@ const router = express.Router();
  *             properties:
  *               message:
  *                 type: string
- *                 example: Customer not found
+ *                 example: User not found
  *     ServerError:
  *       description: Unexpected server error.
  *       content:
@@ -77,38 +119,19 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/auth/register/customer:
+ * /api/auth/register:
  *   post:
- *     summary: Register a new customer
+ *     summary: Register a new user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - full_name
- *               - email
- *               - password
- *             properties:
- *               full_name:
- *                 type: string
- *                 example: Jane Doe
- *               email:
- *                 type: string
- *                 format: email
- *                 example: jane.doe@example.com
- *               phone_number:
- *                 type: string
- *                 example: "+250781234567"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: StrongPassword123
+ *             $ref: "#/components/schemas/RegisterRequest"
  *     responses:
  *       201:
- *         description: Customer registered successfully.
+ *         description: User registered successfully.
  *       400:
  *         description: Missing or invalid fields.
  *       409:
@@ -116,56 +139,13 @@ const router = express.Router();
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.post("/register/customer", registerCustomer);
+router.post("/register", register);
 
 /**
  * @swagger
- * /api/auth/register/clinic:
+ * /api/auth/login:
  *   post:
- *     summary: Register a new clinic
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - clinic_name
- *               - email
- *               - password
- *             properties:
- *               clinic_name:
- *                 type: string
- *                 example: Downtown Health Center
- *               email:
- *                 type: string
- *                 format: email
- *                 example: contact@dhc.com
- *               phone_number:
- *                 type: string
- *                 example: "+250780000000"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: ClinicStrongPassword123
- *     responses:
- *       201:
- *         description: Clinic registered successfully.
- *       400:
- *         description: Missing or invalid fields.
- *       409:
- *         description: Email already registered.
- *       500:
- *         $ref: "#/components/responses/ServerError"
- */
-router.post("/register/clinic", registerClinic);
-
-/**
- * @swagger
- * /api/auth/login/customer:
- *   post:
- *     summary: Login customer
+ *     summary: Login user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -175,7 +155,7 @@ router.post("/register/clinic", registerClinic);
  *             $ref: "#/components/schemas/LoginRequest"
  *     responses:
  *       200:
- *         description: Customer authenticated successfully.
+ *         description: User authenticated successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -187,23 +167,19 @@ router.post("/register/clinic", registerClinic);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.post("/login/customer", loginCustomer);
+router.post("/login", login);
 
 /**
  * @swagger
- * /api/auth/login/clinic:
- *   post:
- *     summary: Login clinic
+ * /api/auth/me:
+ *   get:
+ *     summary: Get the currently authenticated user
  *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: "#/components/schemas/LoginRequest"
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Clinic authenticated successfully.
+ *         description: Current user retrieved successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -215,6 +191,6 @@ router.post("/login/customer", loginCustomer);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.post("/login/clinic", loginClinic);
+router.get("/me", authenticateToken, getCurrentUser);
 
 export default router;
