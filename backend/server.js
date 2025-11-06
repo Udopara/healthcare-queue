@@ -1,26 +1,72 @@
 import dotenv from "dotenv";
 import express from "express";
+
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 import { sequelize } from "./src/models/index.js";
+import patientRoutes from "./src/routes/patient.routes.js";
+import queueRoutes from "./src/routes/queue.routes.js";
+import authRoutes from "./src/routes/auth.routes.js";
+import clinicRoutes from "./src/routes/clinic.routes.js";
+import ticketRoutes from "./src/routes/ticket.routes.js";
+import userRoutes from "./src/routes/user.routes.js";
 
 dotenv.config();
 const app = express();
+app.use(express.json());
 
 (async () => {
   try {
     await sequelize.authenticate();
     console.log("DB connected");
-    await sequelize.sync({ alter: true }); //! remember to disable this in production
+    await sequelize.sync();
   } catch (err) {
     console.error("DB connection failed:", err);
   }
 })();
 
+const specs = swaggerJsdoc({
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "MediQueue API",
+      version: "1.0.0",
+      description: "API documentation for MediQueue",
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT", // visible label in Swagger UI
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
+  },
+  apis: ["./src/routes/*.js"], // path to your route files
+});
+
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.use("/api/patients", patientRoutes);
+app.use("/api/clinics", clinicRoutes);
+app.use("/api/queues", queueRoutes)
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(3000, () =>
   console.log("Server running on port " + PORT)
 );
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
