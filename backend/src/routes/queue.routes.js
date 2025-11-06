@@ -1,5 +1,5 @@
 import express from "express";
-import { createQueue, getAllQueues, getQueueById, updateQueue, deleteQueue } from "../controllers/queue.controller.js";
+import { createQueue, getAllQueues, getQueueById, updateQueue, deleteQueue, callNextInQueue } from "../controllers/queue.controller.js";
 const router = express.Router();
 
 /**
@@ -68,6 +68,44 @@ const router = express.Router();
  *         message:
  *           type: string
  *           example: Queue deleted successfully.
+ *     QueueTicket:
+ *       type: object
+ *       description: Ticket info returned when a queue advances to the next patient.
+ *       properties:
+ *         ticket_id:
+ *           type: integer
+ *           example: 42
+ *         ticket_number:
+ *           type: string
+ *           example: Q-20240602-001
+ *         queue_id:
+ *           type: integer
+ *           example: 5
+ *         status:
+ *           type: string
+ *           enum: [waiting, serving, completed, cancelled]
+ *           example: serving
+ *         notification_contact:
+ *           type: string
+ *           example: "+250788001122"
+ *         issued_at:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-06-02T09:00:00.000Z"
+ *         served_at:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: "2024-06-02T09:10:00.000Z"
+ *     QueueCallResult:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           example: Next ticket called.
+ *         ticket:
+ *           $ref: "#/components/schemas/QueueTicket"
+ *           nullable: true
  *   responses:
  *     NotFound:
  *       description: The requested resource was not found.
@@ -99,6 +137,16 @@ const router = express.Router();
  *               message:
  *                 type: string
  *                 example: Internal server error
+ *     CallNextError:
+ *       description: Queue cannot advance to the next ticket.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: Queue not found
  */
 
 /**
@@ -240,5 +288,32 @@ router.put("/:id", updateQueue);
  *         $ref: "#/components/responses/ServerError"
  */
 router.delete("/:id", deleteQueue);
+
+/**
+ * @swagger
+ * /api/queues/{id}/call-next:
+ *   post:
+ *     summary: Move the queue to the next waiting ticket
+ *     tags: [Queues]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Queue identifier.
+ *     responses:
+ *       200:
+ *         description: Returns the next ticket or a message indicating the queue is empty.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/QueueCallResult"
+ *       400:
+ *         $ref: "#/components/responses/CallNextError"
+ *       500:
+ *         $ref: "#/components/responses/ServerError"
+ */
+router.post("/:id/call-next", callNextInQueue);
 
 export default router;
