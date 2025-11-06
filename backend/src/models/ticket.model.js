@@ -14,7 +14,7 @@ export default (sequelize) => {
         type: INTEGER,
         allowNull: false,
       },
-      customer_id: {
+      patient_id: {
         type: INTEGER,
         allowNull: true,
       },

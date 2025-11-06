@@ -3,21 +3,28 @@ import { DataTypes } from "sequelize";
 const { STRING, INTEGER, DATE, NOW, VIRTUAL } = DataTypes;
 
 export default (sequelize) => {
-  const Clinic = sequelize.define(
-    "Clinic",
+  const Doctor = sequelize.define(
+    "Doctor",
     {
-      clinic_id: {
+      doctor_id: {
         type: INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      clinic_name: {
+      clinic_id: {
+        type: INTEGER,
+        allowNull: false,
+      },
+      full_name: {
         type: STRING(100),
         allowNull: false,
       },
+      phone_number: {
+        type: STRING(50),
+        unique: true,
+      },
       email: {
         type: STRING(100),
-        allowNull: false,
         unique: true,
         validate: {
           isEmail: {
@@ -25,20 +32,16 @@ export default (sequelize) => {
           },
         },
       },
-      phone_number: {
-        type: STRING(50),
-      },
       created_at: {
         type: DATE,
         defaultValue: NOW,
       },
     },
     {
-      tableName: "Clinic",
+      tableName: "Doctor",
       timestamps: false,
     }
   );
 
-
-  return Clinic;
+  return Doctor;
 };

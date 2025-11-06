@@ -2,8 +2,8 @@ import express from "express";
 import {
   cancelTicket,
   createTicket,
-  getTicketByIdForUser,
-  getTicketsForUser,
+  getTicketById,
+  getTickets,
 } from "../controllers/ticket.controller.js";
 import { authenticateToken } from "../middlewares/auth.js";
 
@@ -15,7 +15,7 @@ router.use(authenticateToken);
  * @swagger
  * tags:
  *   name: Tickets
- *   description: Manage queue tickets for authenticated customers
+ *   description: Manage queue tickets for authenticated users (patients can manage their own tickets, admins can view all tickets).
  *
  * components:
  *   schemas:
@@ -23,51 +23,16 @@ router.use(authenticateToken);
  *       type: object
  *       properties:
  *         ticket_id:
- *           type: integer
- *           example: 12
- *         ticket_number:
  *           type: string
- *           example: T-1717324000000-ABCD
  *         queue_id:
  *           type: integer
- *           example: 5
+ *         patient_id:
+ *           type: integer
  *         status:
  *           type: string
  *           enum: [waiting, serving, completed, cancelled]
- *           example: waiting
  *         notification_contact:
  *           type: string
- *           example: "+250788001122"
- *         issued_at:
- *           type: string
- *           format: date-time
- *           example: "2024-06-02T08:45:00.000Z"
- *         served_at:
- *           type: string
- *           format: date-time
- *           nullable: true
- *         estimated_wait_time:
- *           type: integer
- *           description: Estimated wait time in minutes.
- *           example: 15
- *     TicketPayload:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           example: 12
- *         ticket_number:
- *           type: string
- *           example: T-1717324000000-ABCD
- *         queue_id:
- *           type: integer
- *           example: 5
- *         status:
- *           type: string
- *           example: waiting
- *         notification_contact:
- *           type: string
- *           example: "+250788001122"
  *         issued_at:
  *           type: string
  *           format: date-time
@@ -77,7 +42,7 @@ router.use(authenticateToken);
  *           nullable: true
  *         estimated_wait_time:
  *           type: integer
- *           example: 15
+ *           nullable: true
  *     TicketInput:
  *       type: object
  *       required:
@@ -86,101 +51,71 @@ router.use(authenticateToken);
  *       properties:
  *         queue_id:
  *           type: integer
- *           example: 5
  *         notification_contact:
  *           type: string
- *           example: "+250788001122"
- *     TicketResult:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *           example: Ticket created successfully
- *         ticket:
- *           $ref: "#/components/schemas/TicketPayload"
  *     MessageResponse:
  *       type: object
  *       properties:
  *         message:
  *           type: string
- *           example: Ticket cancelled successfully
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
  *   responses:
  *     Unauthorized:
- *       description: Missing or invalid authorization token.
+ *       description: Missing or invalid token.
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               message:
- *                 type: string
- *                 example: No token provided
+ *             $ref: "#/components/schemas/MessageResponse"
  *     Forbidden:
- *       description: Access denied.
+ *       description: Action is not allowed for the authenticated role.
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               message:
- *                 type: string
- *                 example: Invalid or expired token
- *     NotFound:
- *       description: The requested ticket was not found.
+ *             $ref: "#/components/schemas/MessageResponse"
+ *     TicketNotFound:
+ *       description: Ticket not found.
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               message:
- *                 type: string
- *                 example: Ticket not found
+ *             $ref: "#/components/schemas/MessageResponse"
  *     ServerError:
  *       description: Unexpected server error.
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               message:
- *                 type: string
- *                 example: Internal server error
+ *             $ref: "#/components/schemas/MessageResponse"
  */
 
 /**
  * @swagger
  * /api/tickets:
  *   get:
- *     summary: Get tickets for the authenticated customer
+ *     summary: Get tickets for the authenticated user
+ *     description: Patients receive only their tickets; admins receive all tickets.
  *     tags: [Tickets]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: A list of tickets belonging to the authenticated customer.
+ *         description: Tickets retrieved successfully.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: "#/components/schemas/TicketPayload"
+ *                 $ref: "#/components/schemas/Ticket"
  *       401:
  *         $ref: "#/components/responses/Unauthorized"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/", getTicketsForUser);
+router.get("/", getTickets);
 
 /**
  * @swagger
  * /api/tickets/{id}:
  *   get:
- *     summary: Get a ticket by ID (authenticated customer only)
+ *     summary: Get a ticket by ID
+ *     description: Admins can access any ticket; patients can only access their own tickets.
  *     tags: [Tickets]
  *     security:
  *       - bearerAuth: []
@@ -189,29 +124,29 @@ router.get("/", getTicketsForUser);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: The ticket identifier.
+ *           type: string
  *     responses:
  *       200:
  *         description: Ticket retrieved successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/TicketPayload"
+ *               $ref: "#/components/schemas/Ticket"
  *       401:
  *         $ref: "#/components/responses/Unauthorized"
  *       404:
- *         $ref: "#/components/responses/NotFound"
+ *         $ref: "#/components/responses/TicketNotFound"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/:id", getTicketByIdForUser);
+router.get("/:id", getTicketById);
 
 /**
  * @swagger
  * /api/tickets:
  *   post:
- *     summary: Create a new ticket for the authenticated customer
+ *     summary: Create a new ticket
+ *     description: Only patient accounts may create tickets for themselves.
  *     tags: [Tickets]
  *     security:
  *       - bearerAuth: []
@@ -227,29 +162,15 @@ router.get("/:id", getTicketByIdForUser);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/TicketResult"
+ *               $ref: "#/components/schemas/Ticket"
  *       400:
- *         description: Missing required fields.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: queue_id and notification_contact are required.
+ *         description: queue_id or notification_contact missing.
  *       401:
  *         $ref: "#/components/responses/Unauthorized"
+ *       403:
+ *         $ref: "#/components/responses/Forbidden"
  *       404:
  *         description: Queue not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Queue not found
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
@@ -259,7 +180,8 @@ router.post("/", createTicket);
  * @swagger
  * /api/tickets/{id}:
  *   delete:
- *     summary: Cancel a ticket belonging to the authenticated customer
+ *     summary: Cancel a ticket
+ *     description: Only patient accounts may cancel their own tickets.
  *     tags: [Tickets]
  *     security:
  *       - bearerAuth: []
@@ -268,21 +190,16 @@ router.post("/", createTicket);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
- *         description: The ticket identifier.
+ *           type: string
  *     responses:
  *       200:
  *         description: Ticket cancelled successfully.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/TicketResult"
- *       400:
- *         description: Ticket cannot be cancelled.
  *       401:
  *         $ref: "#/components/responses/Unauthorized"
+ *       403:
+ *         $ref: "#/components/responses/Forbidden"
  *       404:
- *         $ref: "#/components/responses/NotFound"
+ *         $ref: "#/components/responses/TicketNotFound"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
