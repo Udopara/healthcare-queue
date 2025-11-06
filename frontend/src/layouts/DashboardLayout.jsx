@@ -116,7 +116,7 @@ export default function DashboardLayout({ children }) {
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <ListChecks className="w-5 h-5 text-white" />
               </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">Queue Generator</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">MediQueue</span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
