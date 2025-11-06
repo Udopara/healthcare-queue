@@ -25,7 +25,7 @@ const Customer = CustomerModel(sequelize);
 const Ticket = TicketModel(sequelize);
 const PasswordResetToken = PasswordResetTokenModel(sequelize);
 
-// ====== Associations ======
+
 Clinic.hasMany(Queue, { foreignKey: "clinic_id", onDelete: "CASCADE" });
 Queue.belongsTo(Clinic, { foreignKey: "clinic_id" });
 
