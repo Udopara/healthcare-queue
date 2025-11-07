@@ -4,11 +4,12 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { sequelize } from "./src/models/index.js";
-import customerRoutes from "./src/routes/customer.routes.js";
+import patientRoutes from "./src/routes/patient.routes.js";
 import queueRoutes from "./src/routes/queue.routes.js";
 import authRoutes from "./src/routes/auth.routes.js";
 import clinicRoutes from "./src/routes/clinic.routes.js";
 import ticketRoutes from "./src/routes/ticket.routes.js";
+import userRoutes from "./src/routes/user.routes.js";
 
 dotenv.config();
 const app = express();
@@ -30,10 +31,26 @@ const specs = swaggerJsdoc({
     info: {
       title: "MediQueue API",
       version: "1.0.0",
+      description: "API documentation for MediQueue",
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT", // visible label in Swagger UI
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
-  apis: ["./src/routes/*.js"],
+  apis: ["./src/routes/*.js"], // path to your route files
 });
+
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
@@ -42,11 +59,12 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.use("/api/customers", customerRoutes);
+app.use("/api/patients", patientRoutes);
 app.use("/api/clinics", clinicRoutes);
 app.use("/api/queues", queueRoutes)
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(3000, () =>

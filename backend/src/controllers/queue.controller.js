@@ -1,4 +1,4 @@
-import { Queue } from "../models/index.js";
+import { Queue, Ticket } from "../models/index.js";
 
 export const getAllQueues = async (req, res) => {
   const { clinic_id } = req.query;
@@ -90,5 +90,15 @@ export const updateQueue = async (req, res) => {
   } catch (error) {
     console.error("Error updating queue:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const callNextInQueue = async (req, res) => {
+  try {
+    const queue_id = req.params.id;
+    const result = await Queue.callNext(queue_id, { Ticket });
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };

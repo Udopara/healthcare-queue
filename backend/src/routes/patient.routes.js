@@ -1,31 +1,36 @@
 import express from "express";
-import { getAllCustomers, updateCustomer, deleteCustomer, getCustomerById } from "../controllers/customer.controller.js";
+import {
+  getAllPatients,
+  updatePatient,
+  deletePatient,
+  getPatientById,
+} from "../controllers/patient.controller.js";
 
 const router = express.Router();
 
 /**
  * @swagger
  * tags:
- *   name: Customers
- *   description: Manage customer registrations
+ *   name: Patients
+ *   description: Manage patient registrations
  *
  * components:
  *   schemas:
- *     Customer:
+ *     Patient:
  *       type: object
  *       properties:
- *         customer_id:
+ *         patient_id:
  *           type: integer
  *           description: Unique identifier.
  *           example: 1
  *         full_name:
  *           type: string
- *           description: Full name of the customer.
+ *           description: Full name of the patient.
  *           example: Jane Doe
  *         email:
  *           type: string
  *           format: email
- *           description: Email address of the customer.
+ *           description: Email address of the patient.
  *           example: jane@example.com
  *         phone_number:
  *           type: string
@@ -34,9 +39,9 @@ const router = express.Router();
  *         created_at:
  *           type: string
  *           format: date-time
- *           description: Timestamp when the customer was created.
+ *           description: Timestamp when the patient was created.
  *           example: "2024-05-01T08:30:00.000Z"
- *     CustomerPayload:
+ *     PatientPayload:
  *       type: object
  *       properties:
  *         id:
@@ -52,7 +57,7 @@ const router = express.Router();
  *         phone_number:
  *           type: string
  *           example: "+250788000111"
- *     CustomerInput:
+ *     PatientInput:
  *       type: object
  *       required:
  *         - full_name
@@ -73,7 +78,7 @@ const router = express.Router();
  *           type: string
  *           format: password
  *           example: mypassword123
- *     CustomerUpdateInput:
+ *     PatientUpdateInput:
  *       type: object
  *       properties:
  *         full_name:
@@ -90,20 +95,20 @@ const router = express.Router();
  *           type: string
  *           format: password
  *           example: anotherPassword456
- *     CustomerResult:
+ *     PatientResult:
  *       type: object
  *       properties:
  *         message:
  *           type: string
- *           example: Customer created successfully.
- *         customer:
- *           $ref: "#/components/schemas/CustomerPayload"
+ *           example: Patient created successfully.
+ *         patient:
+ *           $ref: "#/components/schemas/PatientPayload"
  *     MessageResponse:
  *       type: object
  *       properties:
  *         message:
  *           type: string
- *           example: Customer deleted successfully
+ *           example: Patient deleted successfully
  *   responses:
  *     NotFound:
  *       description: The requested resource was not found.
@@ -114,7 +119,7 @@ const router = express.Router();
  *             properties:
  *               message:
  *                 type: string
- *                 example: Customer not found
+ *                 example: Patient not found
  *     ValidationError:
  *       description: Missing or invalid fields were supplied.
  *       content:
@@ -139,101 +144,101 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/customers:
+ * /api/patients:
  *   get:
- *     summary: Get all customers
- *     description: Retrieve a list of all customers from the system.
- *     tags: [Customers]
+ *     summary: Get all patients
+ *     description: Retrieve a list of all patients from the system.
+ *     tags: [Patients]
  *     responses:
  *       200:
- *         description: A list of customers.
+ *         description: A list of patients.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: "#/components/schemas/Customer"
+ *                 $ref: "#/components/schemas/Patient"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/", getAllCustomers);
+router.get("/", getAllPatients);
 
 /**
  * @swagger
- * /api/customers/{id}:
+ * /api/patients/{id}:
  *   get:
- *     summary: Get a customer by ID
- *     tags: [Customers]
+ *     summary: Get a patient by ID
+ *     tags: [Patients]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: The customer identifier.
+ *         description: The patient identifier.
  *     responses:
  *       200:
- *         description: Customer retrieved successfully.
+ *         description: Patient retrieved successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Customer"
+ *               $ref: "#/components/schemas/Patient"
  *       404:
  *         $ref: "#/components/responses/NotFound"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/:id", getCustomerById);
+router.get("/:id", getPatientById);
 
 /**
  * @swagger
- * /api/customers/{id}:
+ * /api/patients/{id}:
  *   put:
- *     summary: Update an existing customer
- *     tags: [Customers]
+ *     summary: Update an existing patient
+ *     tags: [Patients]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: The customer identifier.
+ *         description: The patient identifier.
  *     requestBody:
  *       required: false
  *       content:
  *         application/json:
  *           schema:
- *             $ref: "#/components/schemas/CustomerUpdateInput"
+ *             $ref: "#/components/schemas/PatientUpdateInput"
  *     responses:
  *       200:
- *         description: Customer updated successfully.
+ *         description: Patient updated successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/CustomerResult"
+ *               $ref: "#/components/schemas/PatientResult"
  *       404:
  *         $ref: "#/components/responses/NotFound"
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.put("/:id", updateCustomer);
+router.put("/:id", updatePatient);
 
 /**
  * @swagger
- * /api/customers/{id}:
+ * /api/patients/{id}:
  *   delete:
- *     summary: Delete a customer
- *     tags: [Customers]
+ *     summary: Delete a patient
+ *     tags: [Patients]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: The customer identifier.
+ *         description: The patient identifier.
  *     responses:
  *       200:
- *         description: Customer deleted successfully.
+ *         description: Patient deleted successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -243,7 +248,7 @@ router.put("/:id", updateCustomer);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.delete("/:id", deleteCustomer);
+router.delete("/:id", deletePatient);
 
 
 export default router;
