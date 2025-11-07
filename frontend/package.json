@@ -12,7 +12,6 @@
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.13.1",
-    "chart.js": "^4.5.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.552.0",
     "react": "^19.1.1",
