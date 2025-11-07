@@ -1,10 +1,60 @@
-import React from 'react'
+import React, {useState} from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
+import { doctors } from './Doc-data';
+import { Search } from 'lucide-react';
 
 export default function BrowseQueue() {
+
+  const [searchDepartment, setSearchDepartment] = useState("")
+
+  const deptSearch = doctors.filter((dept) => dept.department.toLowerCase().includes(searchDepartment.toLowerCase()));
+
   return (
     <DashboardLayout>
-      <h1>Browse Queue</h1>
+
+      <div className='space-y-20'>
+
+        <div className='relative'>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+          <input
+          type="text"
+          placeholder='Search Department....'
+          value={searchDepartment}
+          onChange={(event) => setSearchDepartment(event.target.value)}
+          className='border rounded-4xl border-indigo-600 w-96 h-8 pl-12 pr-4 focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 focus:border-0 placeholder-slate-400' />
+        </div>
+
+        <div className='space-y-10'>
+          <h1 className='text-2xl text-indigo-600'>Certified Doctors:</h1>
+
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 space-y-6'>
+            {deptSearch.length > 0 ? (
+              deptSearch.map((doc, id) => {
+                let availabilityColor = "";
+                if (doc.Availability === "Available") availabilityColor = "text-green-600";
+                else if (doc.Availability === "Busy") availabilityColor = "text-amber-600";
+                else if (doc.Availability === "Offline") availabilityColor = "text-red-600";
+                
+                return (
+                <div key={id} className=' flex flex-col justify-between w-52 h-72 border-l border-l-indigo-600 rounded-2xl p-5 shadow-xl'>
+                  <div>
+                    <img src={doc.img.src} alt="" className='w-25 h-25 mb-4 rounded-full border border-indigo-600 object-cover'/>
+                    <p className='font-semibold'>{doc.name}</p>
+                    <p className='text-indigo-600 font-semibold'>{doc.department}</p>
+                    <p className='font-normal'>Id: {doc.Id}</p>
+                    <p>Status: <span className={`font-semibold ${availabilityColor}`}>{doc.Availability}</span></p>
+                  </div>
+                  <button className='bg-indigo-600 text-white w-24 h-6 rounded-2xl hover:cursor-pointer'>Book now</button>
+                </div>
+                );
+              })
+            ) : (<p className='text-2xl font-light'>No Doctors found</p>)}
+          </div>
+          
+        </div>
+        
+      </div>
+
     </DashboardLayout>
   )
 }

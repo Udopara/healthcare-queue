@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }) {
       logoHref: '/patient/dashboard',
       items: [
         { name: 'Dashboard', href: '/patient/dashboard', icon: LayoutDashboard },
-        { name: 'Browse Queue', href: '/patient/browse', icon: Search },
+        { name: 'Browse Doctors', href: '/patient/browse', icon: Search },
         { name: 'Join Queue', href: '/patient/join', icon: PlusCircle },
         { name: 'My Queues', href: '/patient/my-queues', icon: ListChecks },
         { name: 'Profile', href: '/patient/profile', icon: User },
@@ -193,7 +193,7 @@ export default function DashboardLayout({ children }) {
               
               <div className="hidden sm:flex items-center">
                 <div className="text-sm text-gray-600">
-                  Welcome, <span className="font-medium text-gray-900">{user?.fullName}</span>
+                Welcome😉, <span className="font-medium text-gray-900">{user?.fullName}</span>
                 </div>
               </div>
               
