@@ -19,7 +19,7 @@ export default (sequelize) => {
         type: STRING(20),
         allowNull: false,
         validate: {
-          isIn: [["customer", "clinic"]],
+          isIn: [["admin", "clinic", "doctor", "patient"]],
         },
       },
       token: {

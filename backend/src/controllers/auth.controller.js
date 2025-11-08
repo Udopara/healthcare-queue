@@ -1,4 +1,4 @@
-import { User } from "../models/index.js";
+import { User, PasswordResetToken } from "../models/index.js";
 import { createAuthToken } from "../utils.js";
 import crypto from "crypto";
 import { sendPasswordResetEmail } from "../utils/email.js";
@@ -60,6 +60,14 @@ export const register = async (req, res) => {
         .status(400)
         .json({ message: error.errors?.[0]?.message ?? "Validation error" });
     }
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res
+        .status(409)
+        .json({
+          message:
+            error.errors?.[0]?.message ?? "A user with provided details already exists",
+        });
+    }
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -100,7 +108,95 @@ export const login = async (req, res) => {
   }
 };
 
-// TODO: Implement password reset functionality
+export const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // For privacy, return success even if not found
+      return res.json({ message: "If that email exists, a reset link was sent" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await PasswordResetToken.create({
+      email,
+      user_role: user.role,
+      token,
+      expires_at: expiresAt,
+    });
+
+    const appUrl = process.env.APP_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+    const resetUrl = `${appUrl}/reset-password?token=${token}`;
+
+    try {
+      await sendPasswordResetEmail(email, user.name, resetUrl);
+      console.log(`✅ Password reset email sent successfully to ${email}`);
+    } catch (mailErr) {
+      console.error("❌ Failed to send reset email:", mailErr);
+      console.error("   Full error:", JSON.stringify(mailErr, null, 2));
+      
+      // If email fails, we should still return an error or at least log it properly
+      // But for security, we still return a generic message
+      // However, log the actual error for debugging
+      return res.status(500).json({ 
+        message: "Failed to send reset email. Please try again later or contact support.",
+        error: process.env.NODE_ENV === "development" ? mailErr.message : undefined
+      });
+    }
+
+    return res.json({ message: "If that email exists, a reset link was sent" });
+  } catch (error) {
+    console.error("Request password reset error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ message: "token and password are required" });
+  }
+
+  if (typeof password !== "string" || password.length < 8) {
+    return res.status(400).json({ message: "Password must be at least 8 characters" });
+  }
+
+  try {
+    const record = await PasswordResetToken.findOne({ where: { token } });
+    if (!record || record.used) {
+      return res.status(400).json({ message: "Invalid or used token" });
+    }
+
+    if (new Date(record.expires_at).getTime() < Date.now()) {
+      return res.status(400).json({ message: "Token has expired" });
+    }
+
+    const user = await User.findOne({ where: { email: record.email } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.password = password;
+    await user.save();
+
+    record.used = true;
+    await record.save();
+
+    return res.json({ message: "Password has been reset" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 export const getCurrentUser = async (req, res) => {
   if (!req.user?.id) {

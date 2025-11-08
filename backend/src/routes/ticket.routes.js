@@ -4,6 +4,7 @@ import {
   createTicket,
   getTicketById,
   getTickets,
+  updateTicketStatusByClinic,
 } from "../controllers/ticket.controller.js";
 import { authenticateToken } from "../middlewares/auth.js";
 

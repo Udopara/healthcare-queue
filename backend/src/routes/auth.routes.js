@@ -3,6 +3,8 @@ import {
   getCurrentUser,
   login,
   register,
+  requestPasswordReset,
+  resetPassword,
 } from "../controllers/auth.controller.js";
 import { authenticateToken } from "../middlewares/auth.js";
 

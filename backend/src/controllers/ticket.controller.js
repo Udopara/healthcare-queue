@@ -1,4 +1,6 @@
-import { Ticket, Queue, User } from "../models/index.js";
+import { Ticket, Queue, User, Patient } from "../models/index.js";
+import { Op } from "sequelize";
+import { sendNextUpEmail } from "../utils/email.js";
 
 const mapTicketResponse = (ticket) => ({
   id: ticket.ticket_id,
@@ -130,6 +132,8 @@ export const getTicketById = async (req, res) => {
     return;
   }
 
+  const patientId = await getPatientId(userId);
+
   if (["doctor", "clinic"].includes(role)) {
     return res
       .status(403)
@@ -234,7 +238,7 @@ export const updateTicketStatusByClinic = async (req, res) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    // Ensure the authenticated clinic owns the queue this ticket belongs to
+   
     const queue = await Queue.findByPk(ticket.queue_id);
     if (!queue) {
       return res.status(404).json({ message: "Queue not found" });
@@ -250,13 +254,10 @@ export const updateTicketStatusByClinic = async (req, res) => {
     }
     await ticket.save();
 
-    // When a ticket starts serving, notify the next waiting ticket in same queue
     if (previousStatus !== "serving" && status === "serving") {
-      // Update queue's current ticket
       queue.current_ticket_number = ticket.ticket_id;
       await queue.save();
 
-      // Find the next waiting ticket by earliest in queue
       const nextTicket = await Ticket.findOne({
         where: {
           queue_id: ticket.queue_id,
@@ -269,9 +270,9 @@ export const updateTicketStatusByClinic = async (req, res) => {
         let to = null;
         if (nextTicket.notification_contact?.includes("@")) {
           to = nextTicket.notification_contact;
-        } else if (nextTicket.customer_id) {
-          const customer = await Customer.findByPk(nextTicket.customer_id);
-          if (customer?.email) to = customer.email;
+        } else if (nextTicket.patient_id) {
+          const patient = await Patient.findByPk(nextTicket.patient_id);
+          if (patient?.email) to = patient.email;
         }
 
         if (to) {
