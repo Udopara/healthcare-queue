@@ -93,6 +93,24 @@ export const updateQueue = async (req, res) => {
   }
 };
 
+export const getQueueTickets = async (req, res) => {
+  const {role} = req.user;
+  if (!["doctor", "clinic", "admin"].includes(role)) {
+    return res
+      .status(403)
+      .json({ message: "Access denied. Insufficient permissions." });
+  }
+
+  try {
+    const { queue_id } = req.params;
+    const tickets = await Ticket.findAll({ where: { queue_id } });
+    return res.json(tickets);
+  } catch (error) {
+    console.error("Error fetching tickets for queue:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export const callNextInQueue = async (req, res) => {
   try {
     const queue_id = req.params.id;
