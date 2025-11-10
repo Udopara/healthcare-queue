@@ -1,5 +1,14 @@
 import express from "express";
-import { createQueue, getAllQueues, getQueueById, updateQueue, deleteQueue, callNextInQueue } from "../controllers/queue.controller.js";
+import {
+  createQueue,
+  getAllQueues,
+  getQueueById,
+  updateQueue,
+  deleteQueue,
+  callNextInQueue,
+  getQueueTickets,
+} from "../controllers/queue.controller.js";
+import { authenticateToken } from "../middlewares/auth.js";
 const router = express.Router();
 
 /**
@@ -202,6 +211,47 @@ router.get("/", getAllQueues);
  *         $ref: "#/components/responses/ServerError"
  */
 router.get("/:id", getQueueById);
+
+/**
+ * @swagger
+ * /api/queues/{queue_id}/tickets:
+ *   get:
+ *     summary: Get tickets belonging to a specific queue
+ *     tags: [Queues]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: queue_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Queue identifier.
+ *     responses:
+ *       200:
+ *         description: Tickets retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/QueueTicket"
+ *       401:
+ *         description: Missing or invalid token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MessageResponse"
+ *       403:
+ *         description: Access denied. Insufficient permissions.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MessageResponse"
+ *       500:
+ *         $ref: "#/components/responses/ServerError"
+ */
+router.get("/:queue_id/tickets", authenticateToken, getQueueTickets);
 
 /**
  * @swagger
