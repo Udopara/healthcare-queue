@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react'
 import { getToken, getCurrentUser, setAuth, clearAuth } from '../utils/auth'
+import * as authService from '../services/authService'
 
 const AuthContext = createContext(null)
 
@@ -22,57 +23,49 @@ export const AuthProvider = ({ children }) => {
     initAuth()
   }, [])
 
-  const login = async (phoneNumber, fullName, role = 'patient') => {
+  const login = async (email, password) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await authService.login({ phoneNumber, fullName })
+      const response = await authService.login({ email, password })
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Mock user data
-      const mockUser = {
-        id: '1',
-        phoneNumber,
-        fullName,
-        role: role || 'patient'
+      // Store token and user data
+      const userData = {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        phone_number: response.user.phone_number,
+        role: response.user.role,
+        linked_entity_id: response.user.linked_entity_id
       }
       
-      const mockToken = 'mock-jwt-token-' + Date.now()
+      setAuth(response.token, userData)
+      setUser(userData)
       
-      setAuth(mockToken, mockUser)
-      setUser(mockUser)
-      
-      return { success: true, user: mockUser }
+      return { success: true, user: userData }
     } catch (error) {
-      throw new Error(error.message || 'Login failed')
+      throw error
     }
   }
 
-  const register = async (phoneNumber, fullName, role = 'patient') => {
+  const register = async (userData) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await authService.register({ phoneNumber, fullName })
+      const response = await authService.register(userData)
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Mock user data
-      const mockUser = {
-        id: '1',
-        phoneNumber,
-        fullName,
-        role: role || 'patient'
+      // Store token and user data
+      const user = {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        phone_number: response.user.phone_number,
+        role: response.user.role,
+        linked_entity_id: response.user.linked_entity_id
       }
       
-      const mockToken = 'mock-jwt-token-' + Date.now()
+      setAuth(response.token, user)
+      setUser(user)
       
-      setAuth(mockToken, mockUser)
-      setUser(mockUser)
-      
-      return { success: true, user: mockUser }
+      return { success: true, user }
     } catch (error) {
-      throw new Error(error.message || 'Registration failed')
+      throw error
     }
   }
 
