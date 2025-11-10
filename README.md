@@ -31,7 +31,7 @@ PORT=3000
 
 # Database
 DB_HOST=localhost
-DB_NAME=mediqueue
+DB_NAME=healthcare_queue
 DB_USER=root
 DB_PASS=your_mysql_password
 
@@ -60,7 +60,7 @@ npm install
 ### Database Setup
 1. Create the MySQL database defined in `DB_NAME`:
    ```sql
-   CREATE DATABASE mediqueue CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE DATABASE healthcare_queue CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 2. Start the server once; Sequelize `sync()` will create the tables automatically.
 3. (Optional) Seed data:
