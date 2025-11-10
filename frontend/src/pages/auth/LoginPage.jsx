@@ -139,6 +139,14 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+            <div className="mt-2 flex items-center justify-end">
+              <Link
+                to="/auth/forgot-password"
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           {/* Submit Button */}

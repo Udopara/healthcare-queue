@@ -107,6 +107,65 @@ export const verifyUser = async () => {
 }
 
 /**
+ * Request password reset email
+ * @param {string} email - User's email address
+ * @returns {Promise<Object>} Response message
+ */
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post('/auth/password/forgot', { email })
+    return response.data
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response
+      
+      switch (status) {
+        case 400:
+          throw new Error(data.message || 'Invalid email address.')
+        case 500:
+          throw new Error('Server error. Please try again later.')
+        default:
+          throw new Error(data.message || 'Failed to send reset email. Please try again.')
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.')
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.')
+    }
+  }
+}
+
+/**
+ * Reset password with token
+ * @param {string} token - Reset token from email
+ * @param {string} password - New password
+ * @returns {Promise<Object>} Response message
+ */
+export const resetPassword = async (token, password) => {
+  try {
+    const response = await api.post('/auth/password/reset', { token, password })
+    return response.data
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response
+      
+      switch (status) {
+        case 400:
+          throw new Error(data.message || 'Invalid or expired reset token.')
+        case 500:
+          throw new Error('Server error. Please try again later.')
+        default:
+          throw new Error(data.message || 'Failed to reset password. Please try again.')
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.')
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.')
+    }
+  }
+}
+
+/**
  * Logout a user (client-side only for now)
  */
 export const logout = () => {
