@@ -11,9 +11,14 @@ import {
   Search,
   CheckCircle2,
   AlertCircle,
-  Trash2
+  Trash2,
+  User,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { getAllClinics, updateClinic, deleteClinic } from '../../services/adminService'
+import * as authService from '../../services/authService'
 import toast from 'react-hot-toast'
 
 export default function AdminClinics() {
@@ -25,10 +30,14 @@ export default function AdminClinics() {
   const [editingClinic, setEditingClinic] = useState(null)
   const [deletingClinic, setDeletingClinic] = useState(null)
   const [formData, setFormData] = useState({
-    clinic_name: '',
+    name: '',
     email: '',
-    phone_number: ''
+    phone_number: '',
+    password: '',
+    confirmPassword: ''
   })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -53,18 +62,24 @@ export default function AdminClinics() {
     if (clinic) {
       setEditingClinic(clinic)
       setFormData({
-        clinic_name: clinic.clinic_name || '',
+        name: clinic.clinic_name || '',
         email: clinic.email || '',
-        phone_number: clinic.phone_number || ''
+        phone_number: clinic.phone_number || '',
+        password: '',
+        confirmPassword: ''
       })
     } else {
       setEditingClinic(null)
       setFormData({
-        clinic_name: '',
+        name: '',
         email: '',
-        phone_number: ''
+        phone_number: '',
+        password: '',
+        confirmPassword: ''
       })
     }
+    setShowPassword(false)
+    setShowConfirmPassword(false)
     setShowModal(true)
   }
 
@@ -72,10 +87,14 @@ export default function AdminClinics() {
     setShowModal(false)
     setEditingClinic(null)
     setFormData({
-      clinic_name: '',
+      name: '',
       email: '',
-      phone_number: ''
+      phone_number: '',
+      password: '',
+      confirmPassword: ''
     })
+    setShowPassword(false)
+    setShowConfirmPassword(false)
   }
 
   const handleOpenDeleteModal = (clinic) => {
@@ -112,13 +131,38 @@ export default function AdminClinics() {
     return emailRegex.test(email)
   }
 
+  const validatePhoneNumber = (phone) => {
+    // Accept format like +250784593206
+    const phoneRegex = /^\+\d{10,15}$/
+    return phoneRegex.test(phone)
+  }
+
+  const validatePassword = (password) => {
+    // At least 8 characters
+    return password.length >= 8
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData({
+      ...formData,
+      [name]: value
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
 
     // Validation
-    if (!formData.clinic_name.trim()) {
+    if (!formData.name.trim()) {
       toast.error('Clinic name is required')
+      setSubmitting(false)
+      return
+    }
+
+    if (formData.name.trim().length < 2) {
+      toast.error('Clinic name must be at least 2 characters')
       setSubmitting(false)
       return
     }
@@ -141,17 +185,49 @@ export default function AdminClinics() {
       return
     }
 
+    if (!validatePhoneNumber(formData.phone_number)) {
+      toast.error('Phone number must be in format +250XXXXXXXXX')
+      setSubmitting(false)
+      return
+    }
+
     try {
       if (editingClinic) {
         // Update existing clinic
         await updateClinic(editingClinic.id, {
-          clinic_name: formData.clinic_name.trim(),
+          clinic_name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
           phone_number: formData.phone_number.trim()
         })
         toast.success('Clinic updated successfully!')
       } else {
-        // TODO: Implement create API call when backend endpoint is available
+        // Create new clinic using register API
+        if (!formData.password) {
+          toast.error('Password is required')
+          setSubmitting(false)
+          return
+        }
+
+        if (!validatePassword(formData.password)) {
+          toast.error('Password must be at least 8 characters long')
+          setSubmitting(false)
+          return
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+          toast.error('Passwords do not match')
+          setSubmitting(false)
+          return
+        }
+
+        // Call register API with role='clinic'
+        await authService.register({
+          name: formData.name.trim(),
+          email: formData.email.trim().toLowerCase(),
+          phone_number: formData.phone_number.trim(),
+          password: formData.password,
+          role: 'clinic'
+        })
         toast.success('Clinic created successfully!')
       }
       
@@ -342,54 +418,153 @@ export default function AdminClinics() {
           onClose={handleCloseModal}
           title={editingClinic ? 'Edit Clinic' : 'Add New Clinic'}
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto p-3">
+            {/* Clinic Name */}
             <div>
-              <label htmlFor="clinic_name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Clinic Name <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                id="clinic_name"
-                name="clinic_name"
-                required
-                value={formData.clinic_name}
-                onChange={(e) => setFormData({ ...formData, clinic_name: e.target.value })}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                placeholder="Enter clinic name"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  autoComplete="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  placeholder="Enter clinic name"
+                />
+              </div>
             </div>
 
+            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address <span className="text-red-500">*</span>
               </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                placeholder="clinic@example.com"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  placeholder="clinic@example.com"
+                />
+              </div>
             </div>
 
+            {/* Phone Number */}
             <div>
               <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700 mb-2">
                 Phone Number <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
-                id="phone_number"
-                name="phone_number"
-                required
-                value={formData.phone_number}
-                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                placeholder="+1234567890"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="tel"
+                  id="phone_number"
+                  name="phone_number"
+                  required
+                  autoComplete="tel"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  placeholder="+250781234567"
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Include country code (e.g., +250 for Rwanda)
+              </p>
             </div>
+
+            {/* Password - Only show when creating (not editing) */}
+            {!editingClinic && (
+              <>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      required={!editingClinic}
+                      autoComplete="new-password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      placeholder="Create a strong password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Must be at least 8 characters long
+                  </p>
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      required={!editingClinic}
+                      autoComplete="new-password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      placeholder="Confirm your password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="flex items-center justify-end gap-3 pt-4">
               <button
