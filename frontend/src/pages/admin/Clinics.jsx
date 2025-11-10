@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react'
-import { getAllClinics } from '../../services/adminService'
+import { getAllClinics, updateClinic } from '../../services/adminService'
 import toast from 'react-hot-toast'
 
 export default function AdminClinics() {
@@ -109,11 +109,16 @@ export default function AdminClinics() {
     }
 
     try {
-      // TODO: Implement create/update API calls when backend endpoints are available
-      // For now, just show a success message
       if (editingClinic) {
+        // Update existing clinic
+        await updateClinic(editingClinic.id, {
+          clinic_name: formData.clinic_name.trim(),
+          email: formData.email.trim().toLowerCase(),
+          phone_number: formData.phone_number.trim()
+        })
         toast.success('Clinic updated successfully!')
       } else {
+        // TODO: Implement create API call when backend endpoint is available
         toast.success('Clinic created successfully!')
       }
       

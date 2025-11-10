@@ -43,6 +43,33 @@ export const getAllClinics = async () => {
   }
 };
 
+// Update a clinic
+export const updateClinic = async (id, clinicData) => {
+  try {
+    const response = await api.put(`/clinics/${id}`, clinicData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response;
+      
+      switch (status) {
+        case 400:
+          throw new Error(data.message || 'Invalid clinic data. Please check your input.');
+        case 404:
+          throw new Error('Clinic not found.');
+        case 500:
+          throw new Error('Server error. Please try again later.');
+        default:
+          throw new Error(data.message || 'Failed to update clinic. Please try again.');
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.');
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.');
+    }
+  }
+};
+
 // Get all patients
 export const getAllPatients = async () => {
   try {

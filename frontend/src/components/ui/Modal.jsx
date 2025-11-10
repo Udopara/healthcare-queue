@@ -30,21 +30,13 @@ export default function Modal({
 
   if (!isOpen) return null
 
-  const handleBackdropClick = (e) => {
-    // Only close if clicking the backdrop itself, not the modal content
-    if (e.target === e.currentTarget) {
-      onClose()
-    }
-  }
 
   return (
     <div
       className="fixed inset-0 bg-gray-900/75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
-      onClick={handleBackdropClick}
     >
       <div
         className={`relative bg-white rounded-xl shadow-xl ${maxWidth} w-full p-6 transform transition-all`}
-        onClick={(e) => e.stopPropagation()}
       >
         {title && (
           <div className="flex items-center justify-between mb-6">
