@@ -10,9 +10,10 @@ import {
   Loader2, 
   Search,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react'
-import { getAllClinics, updateClinic } from '../../services/adminService'
+import { getAllClinics, updateClinic, deleteClinic } from '../../services/adminService'
 import toast from 'react-hot-toast'
 
 export default function AdminClinics() {
@@ -20,13 +21,16 @@ export default function AdminClinics() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [editingClinic, setEditingClinic] = useState(null)
+  const [deletingClinic, setDeletingClinic] = useState(null)
   const [formData, setFormData] = useState({
     clinic_name: '',
     email: '',
     phone_number: ''
   })
   const [submitting, setSubmitting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     loadClinics()
@@ -72,6 +76,35 @@ export default function AdminClinics() {
       email: '',
       phone_number: ''
     })
+  }
+
+  const handleOpenDeleteModal = (clinic) => {
+    setDeletingClinic(clinic)
+    setShowDeleteModal(true)
+  }
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false)
+    setDeletingClinic(null)
+  }
+
+  const handleDelete = async () => {
+    if (!deletingClinic) return
+
+    setDeleting(true)
+    try {
+      await deleteClinic(deletingClinic.id)
+      toast.success('Clinic deleted successfully!')
+      handleCloseDeleteModal()
+      // Reload clinics after a short delay
+      setTimeout(() => {
+        loadClinics()
+      }, 500)
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete clinic. Please try again.')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const validateEmail = (email) => {
@@ -270,13 +303,22 @@ export default function AdminClinics() {
                       <p className="text-xs text-gray-500 mt-1">ID: {clinic.id}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleOpenModal(clinic)}
-                    className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                    title="Edit clinic"
-                  >
-                    <Edit2 className="h-5 w-5" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenModal(clinic)}
+                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      title="Edit clinic"
+                    >
+                      <Edit2 className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleOpenDeleteModal(clinic)}
+                      className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete clinic"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -373,6 +415,68 @@ export default function AdminClinics() {
               </button>
             </div>
           </form>
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteModal}
+          onClose={handleCloseDeleteModal}
+          title="Delete Clinic"
+        >
+          <div className="space-y-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Are you sure you want to delete this clinic?
+                </h3>
+                <p className="mt-2 text-sm text-gray-600">
+                  This will permanently delete <strong>{deletingClinic?.clinic_name}</strong>.
+                  This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-sm text-gray-700">
+                <strong>Clinic Name:</strong> {deletingClinic?.clinic_name}
+              </p>
+              <p className="text-sm text-gray-700 mt-1">
+                <strong>Email:</strong> {deletingClinic?.email}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4">
+              <button
+                type="button"
+                onClick={handleCloseDeleteModal}
+                disabled={deleting}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Clinic
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </Modal>
       </div>
     </DashboardLayout>

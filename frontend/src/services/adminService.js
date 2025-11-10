@@ -70,6 +70,31 @@ export const updateClinic = async (id, clinicData) => {
   }
 };
 
+// Delete a clinic
+export const deleteClinic = async (id) => {
+  try {
+    const response = await api.delete(`/clinics/${id}`);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response;
+      
+      switch (status) {
+        case 404:
+          throw new Error('Clinic not found.');
+        case 500:
+          throw new Error('Server error. Please try again later.');
+        default:
+          throw new Error(data.message || 'Failed to delete clinic. Please try again.');
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.');
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.');
+    }
+  }
+};
+
 // Get all patients
 export const getAllPatients = async () => {
   try {
