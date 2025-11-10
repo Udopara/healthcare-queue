@@ -21,7 +21,6 @@ import PatientNotFound from '../pages/patient/NotFound'
 
 // Doctor Pages
 import DoctorDashboard from '../pages/doctor/Dashboard'
-import CreateQueue from '../pages/doctor/CreateQueue'
 import DoctorQueues from '../pages/doctor/Queues'
 import DoctorAppointments from '../pages/doctor/Appointments'
 import DoctorReports from '../pages/doctor/Reports'
@@ -88,20 +87,19 @@ export default function RoleBasedRoutes() {
   }
 
   // Doctor Routes
-  if (role === 'doctor') {
-    return (
-      <Routes>
-        <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-        <Route path="/doctor/create-queue" element={<CreateQueue />} />
-        <Route path="/doctor/queues" element={<DoctorQueues />} />
-        <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-        <Route path="/doctor/reports" element={<DoctorReports />} />
-        <Route path="/doctor/settings" element={<DoctorSettings />} />
-        <Route path="/doctor/*" element={<DoctorNotFound />} />
-        <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
-      </Routes>
-    )
-  }
+ if (role === 'doctor') {
+  return (
+    <Routes>
+      <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+      <Route path="/doctor/queues" element={<DoctorQueues />} />
+      <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+      <Route path="/doctor/reports" element={<DoctorReports />} />
+      <Route path="/doctor/settings" element={<DoctorSettings />} />
+      <Route path="/doctor/*" element={<DoctorNotFound />} />
+      <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
+    </Routes>
+  )
+}
 
   // Admin Routes
   if (role === 'admin') {
