@@ -4,8 +4,9 @@ import api from './api';
 export const getDashboardStats = async () => {
   try {
     // Fetch all data in parallel
-    const [clinics, users, queues, tickets] = await Promise.all([
+    const [clinics, patients, users, queues, tickets] = await Promise.all([
       api.get('/clinics'),
+      api.get('/patients'),
       api.get('/users'),
       api.get('/queues'),
       api.get('/tickets')
@@ -14,7 +15,7 @@ export const getDashboardStats = async () => {
     const stats = {
       totalClinics: clinics.data.length,
       totalDoctors: users.data.filter(u => u.role === 'doctor').length,
-      totalPatients: users.data.filter(u => u.role === 'patient').length,
+      totalPatients: patients.data.length,
       totalQueues: queues.data.length,
       totalTickets: tickets.data.length,
       activeTickets: tickets.data.filter(t => t.status === 'waiting' || t.status === 'serving').length,
@@ -38,6 +39,17 @@ export const getAllClinics = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching clinics:', error);
+    throw error;
+  }
+};
+
+// Get all patients
+export const getAllPatients = async () => {
+  try {
+    const response = await api.get('/patients');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching patients:', error);
     throw error;
   }
 };

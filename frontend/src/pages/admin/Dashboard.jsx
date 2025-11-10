@@ -20,6 +20,8 @@ import {
   generateClinicPerformanceData,
   generateSystemActivityTimeSeries
 } from '../../utils/dummyData';
+import { getDashboardStats, getClinicPerformance } from '../../services/adminService';
+import toast from 'react-hot-toast';
 
 // Professional color scheme
 const PRIMARY_COLOR = "#6366f1"; // Indigo
@@ -37,25 +39,59 @@ export default function AdminDashboard() {
   const [clinicPerformance, setClinicPerformance] = useState([]);
 
   useEffect(() => {
-    // Simulate loading delay for better UX
-    const loadDummyData = () => {
-      setStats({
-        totalClinics: 3,
-        totalDoctors: 5,
-        totalPatients: 20,
-        totalQueues: 6,
-        totalUsers: 28,
-        systemActivity: 321
-      });
-      setUserGrowthData(generateUserGrowthTimeSeries(30));
-      setUserDistributionData(generateUserDistributionData());
-      setSystemActivityData(generateSystemActivityTimeSeries(30));
-      setClinicPerformance(generateClinicPerformanceData());
-      setLoading(false);
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch real stats from API
+        const statsData = await getDashboardStats();
+        setStats({
+          totalClinics: statsData.totalClinics || 0,
+          totalDoctors: statsData.totalDoctors || 0,
+          totalPatients: statsData.totalPatients || 0,
+          totalQueues: statsData.totalQueues || 0,
+          totalUsers: (statsData.totalDoctors || 0) + (statsData.totalPatients || 0),
+          systemActivity: statsData.totalTickets || 0
+        });
+
+        // Fetch real clinic performance data
+        try {
+          const clinicPerf = await getClinicPerformance();
+          setClinicPerformance(clinicPerf);
+        } catch (error) {
+          console.error('Error loading clinic performance:', error);
+          // Fallback to dummy data if API fails
+          setClinicPerformance(generateClinicPerformanceData());
+        }
+
+        // Use dummy data for charts (until we have time series endpoints)
+        setUserGrowthData(generateUserGrowthTimeSeries(30));
+        setUserDistributionData(generateUserDistributionData());
+        setSystemActivityData(generateSystemActivityTimeSeries(30));
+        
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        toast.error('Failed to load some dashboard data. Showing cached information.');
+        
+        // Fallback to dummy data
+        setStats({
+          totalClinics: 0,
+          totalDoctors: 0,
+          totalPatients: 0,
+          totalQueues: 0,
+          totalUsers: 0,
+          systemActivity: 0
+        });
+        setUserGrowthData(generateUserGrowthTimeSeries(30));
+        setUserDistributionData(generateUserDistributionData());
+        setSystemActivityData(generateSystemActivityTimeSeries(30));
+        setClinicPerformance(generateClinicPerformanceData());
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Small delay to show loading state
-    setTimeout(loadDummyData, 500);
+    loadDashboardData();
   }, []);
 
   // Table columns for clinic performance
