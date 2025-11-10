@@ -8,20 +8,50 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Initialize auth state from localStorage
+  // Initialize auth state and verify with server on every page reload
+  // This useEffect runs once on mount (which happens on every page reload)
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       const token = getToken()
-      const currentUser = getCurrentUser()
       
-      if (token && currentUser) {
-        setUser(currentUser)
+      // Always verify token with server on reload if token exists
+      if (token) {
+        try {
+          // Call /api/auth/me to verify token and get fresh user data
+          const response = await authService.verifyUser()
+          
+          if (response.user) {
+            // Store fresh user data from server
+            const userData = {
+              id: response.user.id,
+              name: response.user.name,
+              email: response.user.email,
+              phone_number: response.user.phone_number,
+              role: response.user.role,
+              linked_entity_id: response.user.linked_entity_id
+            }
+            
+            // Update localStorage with fresh data from server
+            setAuth(token, userData)
+            setUser(userData)
+          }
+        } catch (error) {
+          // Token is invalid or expired, clear auth
+          console.log('Token verification failed on reload:', error.message)
+          clearAuth()
+          setUser(null)
+        }
+      } else {
+        // No token found, ensure user is null
+        setUser(null)
       }
+      
       setLoading(false)
     }
 
+    // Always call on mount (every page reload)
     initAuth()
-  }, [])
+  }, []) // Empty dependency array ensures this runs once on mount (every reload)
 
   const login = async (email, password) => {
     try {
@@ -90,12 +120,42 @@ export const AuthProvider = ({ children }) => {
     return roleRoutes[userRole] || '/patient/dashboard'
   }
 
+  const refreshUser = async () => {
+    const token = getToken()
+    if (!token) {
+      setUser(null)
+      return null
+    }
+
+    try {
+      const response = await authService.verifyUser()
+      if (response.user) {
+        const userData = {
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+          phone_number: response.user.phone_number,
+          role: response.user.role,
+          linked_entity_id: response.user.linked_entity_id
+        }
+        setAuth(token, userData)
+        setUser(userData)
+        return userData
+      }
+    } catch (error) {
+      clearAuth()
+      setUser(null)
+      throw error
+    }
+  }
+
   const value = {
     user,
     loading,
     login,
     register,
     logout,
+    refreshUser,
     isAuthenticated: isAuthenticated(),
     getDashboardRoute
   }

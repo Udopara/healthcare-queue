@@ -78,6 +78,35 @@ export const login = async (credentials) => {
 }
 
 /**
+ * Verify current authenticated user with server
+ * Calls /api/auth/me to check if token is still valid
+ * @returns {Promise<Object>} Current user data from server
+ */
+export const verifyUser = async () => {
+  try {
+    const response = await api.get('/auth/me')
+    return response.data
+  } catch (error) {
+    if (error.response) {
+      const { status } = error.response
+      
+      if (status === 401) {
+        // Token is invalid or expired
+        throw new Error('Session expired. Please login again.')
+      } else if (status === 500) {
+        throw new Error('Server error. Please try again later.')
+      } else {
+        throw new Error('Failed to verify user session.')
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.')
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.')
+    }
+  }
+}
+
+/**
  * Logout a user (client-side only for now)
  */
 export const logout = () => {
