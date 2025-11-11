@@ -1,3 +1,4 @@
+// src/pages/doctor/DoctorDashboard.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import KPICard from '../../components/admin/dashboard/KPICard';
@@ -6,109 +7,69 @@ import ProfessionalLineChart from '../../components/admin/dashboard/Professional
 import ChartBarChart from '../../components/admin/dashboard/ChartBarChart';
 import SimpleDonutChart from '../../components/admin/dashboard/SimpleDonutChart';
 import SimpleTable from '../../components/admin/dashboard/SimpleTable';
-import {
-  Building2,
-  Stethoscope,
-  Users,
-  ListChecks,
-  TrendingUp,
-  Activity
-} from 'lucide-react';
 import { 
-  generateUserGrowthTimeSeries, 
-  generateUserDistributionData, 
-  generateClinicPerformanceData,
-  generateSystemActivityTimeSeries
-} from '../../utils/dummyData';
+  Users, 
+  ListChecks, 
+  Activity, 
+  Stethoscope, 
+  Calendar 
+} from 'lucide-react';
 
-// Professional color scheme
+
 const PRIMARY_COLOR = "#6366f1"; // Indigo
 const SECONDARY_COLOR = "#10b981"; // Emerald
 const ACCENT_COLOR = "#8b5cf6"; // Purple
-const CHART_GRADIENT_START = "#6366f1"; // Indigo
-const CHART_GRADIENT_END = "#8b5cf6"; // Purple
 
-export default function AdminDashboard() {
+export default function DoctorDashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
-  const [userGrowthData, setUserGrowthData] = useState([]);
-  const [userDistributionData, setUserDistributionData] = useState([]);
-  const [systemActivityData, setSystemActivityData] = useState([]);
-  const [clinicPerformance, setClinicPerformance] = useState([]);
+  const [patientGrowthData, setPatientGrowthData] = useState([]);
+  const [appointmentDistributionData, setAppointmentDistributionData] = useState([]);
+  const [queueActivityData, setQueueActivityData] = useState([]);
+  const [doctorPerformance, setDoctorPerformance] = useState([]);
 
   useEffect(() => {
-    // Simulate loading delay for better UX
     const loadDummyData = () => {
       setStats({
-        totalClinics: 3,
-        totalDoctors: 5,
-        totalPatients: 20,
-        totalQueues: 6,
-        totalUsers: 28,
-        systemActivity: 321
+        totalPatients: 12,
+        activeQueues: 3,
+        totalAppointments: 8,
+        dailyOperations: 18
       });
-      setUserGrowthData(generateUserGrowthTimeSeries(30));
-      setUserDistributionData(generateUserDistributionData());
-      setSystemActivityData(generateSystemActivityTimeSeries(30));
-      setClinicPerformance(generateClinicPerformanceData());
+      setPatientGrowthData(generatePatientGrowthTimeSeries(30));
+      setAppointmentDistributionData(generateAppointmentDistributionData());
+      setQueueActivityData(generateQueueActivityTimeSeries(30));
+      setDoctorPerformance(generateDoctorPerformanceData());
       setLoading(false);
     };
 
-    // Small delay to show loading state
     setTimeout(loadDummyData, 500);
   }, []);
 
-  // Table columns for clinic performance
-  const clinicColumns = useMemo(() => [
+  const appointmentColumns = useMemo(() => [
     {
-      accessorKey: 'clinic_name',
-      header: 'Clinic Name',
-      cell: ({ getValue }) => (
-        <span className="font-medium text-gray-900">{getValue()}</span>
-      ),
+      accessorKey: 'patient_name',
+      header: 'Patient Name',
+      cell: ({ getValue }) => <span className="font-medium text-gray-900">{getValue()}</span>
     },
     {
-      accessorKey: 'total_queues',
-      header: 'Queues',
-      cell: ({ getValue }) => (
-        <span className="text-gray-600">{getValue()}</span>
-      ),
+      accessorKey: 'appointment_time',
+      header: 'Time',
+      cell: ({ getValue }) => <span className="text-gray-600">{getValue()}</span>
     },
     {
-      accessorKey: 'total_tickets',
-      header: 'Total Tickets',
-      cell: ({ getValue }) => (
-        <span className="font-medium text-gray-900">{getValue()}</span>
-      ),
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ getValue }) => {
+        let color = getValue() === 'Active' ? PRIMARY_COLOR : SECONDARY_COLOR;
+        return <span className="font-medium" style={{ color }}>{getValue()}</span>;
+      }
     },
     {
-      accessorKey: 'completed_tickets',
-      header: 'Completed',
-      cell: ({ getValue }) => (
-        <span className="font-medium" style={{ color: SECONDARY_COLOR }}>{getValue()}</span>
-      ),
-    },
-    {
-      accessorKey: 'active_tickets',
-      header: 'Active',
-      cell: ({ getValue }) => (
-        <span className="font-medium" style={{ color: PRIMARY_COLOR }}>{getValue()}</span>
-      ),
-    },
-    {
-      accessorKey: 'total_patients',
-      header: 'Patients',
-      cell: ({ getValue }) => (
-        <span className="text-gray-600">{getValue()}</span>
-      ),
-    },
-    {
-      accessorKey: 'avg_wait_time',
-      header: 'Avg Wait (min)',
-      cell: ({ getValue }) => (
-        <span className="text-gray-600">{getValue() || 0}</span>
-      ),
-    },
+      accessorKey: 'notes',
+      header: 'Notes',
+      cell: ({ getValue }) => <span className="text-gray-600">{getValue()}</span>
+    }
   ], []);
 
   if (loading) {
@@ -127,115 +88,53 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        {/* Header with gradient */}
+        {/* Header */}
         <div className="relative rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 p-8 shadow-2xl overflow-hidden">
-          {/* Animated background pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
               backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
               backgroundSize: '32px 32px'
             }}></div>
           </div>
-          
           <div className="relative">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
-              Admin Dashboard
+              Doctor Dashboard
             </h1>
             <p className="text-indigo-100 text-base font-medium">
-              System-wide overview and analytics
+              Overview of your patients, queues, and appointments
             </p>
           </div>
-          
-          {/* Decorative gradient orb */}
           <div className="absolute -right-12 -top-12 w-64 h-64 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full opacity-20 blur-3xl"></div>
           <div className="absolute -left-12 -bottom-12 w-64 h-64 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full opacity-20 blur-3xl"></div>
         </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <KPICard
-            title="Total Clinics"
-            value={stats?.totalClinics || 0}
-            change="+12.5%"
-            changeType="increase"
-            icon={Building2}
-          />
-          <KPICard
-            title="Total Doctors"
-            value={stats?.totalDoctors || 0}
-            change="+8.2%"
-            changeType="increase"
-            icon={Stethoscope}
-          />
-          <KPICard
-            title="Total Patients"
-            value={stats?.totalPatients || 0}
-            change="+15.3%"
-            changeType="increase"
-            icon={Users}
-          />
-          <KPICard
-            title="Total Users"
-            value={stats?.totalUsers || 0}
-            change="+10.1%"
-            changeType="increase"
-            icon={Users}
-          />
+          <KPICard title="Total Patients" value={stats.totalPatients} change="+5%" changeType="increase" icon={Users} />
+          <KPICard title="Active Queues" value={stats.activeQueues} change="+2%" changeType="increase" icon={ListChecks} />
+          <KPICard title="Total Appointments" value={stats.totalAppointments} change="+10%" changeType="increase" icon={Calendar} />
+          <KPICard title="Daily Operations" value={stats.dailyOperations} change="+8%" changeType="increase" icon={Activity} />
         </div>
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <StatCard
-            title="Total Queues"
-            value={stats?.totalQueues || 0}
-            subtitle="Across all clinics"
-            icon={ListChecks}
-          />
-          <StatCard
-            title="System Activity"
-            value={stats?.systemActivity || 0}
-            subtitle="Total operations today"
-            icon={Activity}
-          />
-          <StatCard
-            title="Growth Rate"
-            value="+12.5%"
-            subtitle="User growth this month"
-            icon={TrendingUp}
-          />
+          <StatCard title="Queues Today" value={stats.activeQueues} subtitle="Current active queues" icon={ListChecks} />
+          <StatCard title="Appointments Today" value={stats.totalAppointments} subtitle="Scheduled appointments" icon={Calendar} />
+          <StatCard title="Daily Operations" value={stats.dailyOperations} subtitle="Patients handled today" icon={Activity} />
         </div>
 
-        {/* Charts Row 1 */}
+        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ProfessionalLineChart
-            data={userGrowthData}
-            title="User Growth Over Time"
-            dataKey="users"
-            color={PRIMARY_COLOR}
-          />
-          <SimpleDonutChart
-            data={userDistributionData}
-            title="User Distribution by Role"
-          />
+          <ProfessionalLineChart data={patientGrowthData} title="Patient Consultations Over Time" dataKey="patients" color={PRIMARY_COLOR} />
+          <SimpleDonutChart data={appointmentDistributionData} title="Appointments by Type" />
         </div>
 
-        {/* Charts Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-          <ChartBarChart
-            data={clinicPerformance}
-            title="Clinic Performance Comparison"
-            dataKey="total_tickets"
-            nameKey="clinic_name"
-            color={PRIMARY_COLOR}
-          />
+          <ChartBarChart data={doctorPerformance} title="Doctor Performance Overview" dataKey="appointments" nameKey="doctor_name" color={PRIMARY_COLOR} />
         </div>
 
-        {/* Table */}
-        <SimpleTable
-          data={clinicPerformance}
-          columns={clinicColumns}
-          title="Clinic Performance Overview"
-        />
+        {/* Appointments Table */}
+        <SimpleTable data={doctorPerformance} columns={appointmentColumns} title="Your Appointments & Queues" />
       </div>
     </DashboardLayout>
   );
