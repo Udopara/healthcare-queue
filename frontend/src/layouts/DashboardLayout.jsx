@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }) {
         { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Clinics', href: '/admin/clinics', icon: Building2 },
         { name: 'Doctors', href: '/admin/doctors', icon: Stethoscope },
-        { name: 'Patients', href: '/admin/patients', icon: Users },
+        { name: 'Manage Users', href: '/admin/users', icon: Users },
         { name: 'Reports', href: '/admin/reports', icon: BarChart },
         { name: 'System Settings', href: '/admin/settings', icon: Settings },
       ]
