@@ -1,4 +1,4 @@
-import { Ticket, Queue, User, Patient } from "../models/index.js";
+import { Ticket, Queue, User, Patient, Doctor } from "../models/index.js";
 import { Op } from "sequelize";
 import { sendNextUpEmail } from "../utils/email.js";
 
@@ -30,7 +30,7 @@ export const createTicket = async (req, res) => {
   const userId = ensureAuthenticatedUser(req, res);
   if (userId === null) return;
 
-  if (req.user.role !== "patient") {
+  if (!["patient","admin"].includes(req.user.role)) {
     return res
       .status(403)
       .json({ message: "Forbidden: Only patients can create tickets" });
@@ -49,6 +49,16 @@ export const createTicket = async (req, res) => {
     const queue = await Queue.findByPk(queue_id);
     if (!queue) {
       return res.status(404).json({ message: "Queue not found" });
+    }
+
+    const ticketsCount = await Ticket.count({
+      where: {
+        queue_id,
+      }
+    });
+
+    if (queue.max_number > 0 && ticketsCount >= queue.max_number) {
+      return res.status(400).json({ message: "Queue has reached its maximum capacity." });
     }
 
     let ticket = null;

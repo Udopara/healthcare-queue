@@ -39,6 +39,10 @@ const router = express.Router();
  *           type: integer
  *           description: Clinic that owns the queue.
  *           example: 2
+ *         max_number:
+ *           type: integer
+ *           description: Maximum number of patients allowed in the queue.
+ *           example: 25
  *         created_at:
  *           type: string
  *           format: date-time
@@ -49,6 +53,7 @@ const router = express.Router();
  *       required:
  *         - queue_name
  *         - clinic_id
+ *         - max_number
  *       properties:
  *         queue_name:
  *           type: string
@@ -58,6 +63,10 @@ const router = express.Router();
  *           type: integer
  *           description: Clinic that owns the queue.
  *           example: 2
+ *         max_number:
+ *           type: integer
+ *           description: Maximum number of patients allowed in the queue.
+ *           example: 25
  *     QueueUpdateInput:
  *       type: object
  *       properties:
@@ -67,6 +76,10 @@ const router = express.Router();
  *         clinic_id:
  *           type: integer
  *           example: 4
+ *         max_number:
+ *           type: integer
+ *           description: Maximum number of patients allowed in the queue.
+ *           example: 25
  *         status:
  *           type: string
  *           enum: [open, closed, paused]

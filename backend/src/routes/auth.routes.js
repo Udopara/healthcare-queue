@@ -76,6 +76,9 @@ const router = express.Router();
  *           type: string
  *           enum: [admin, clinic, doctor, patient]
  *           example: patient
+ *         clinicId:
+ *           type: integer
+ *           example: 1
  *         password:
  *           type: string
  *           format: password
