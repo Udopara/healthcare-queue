@@ -14,9 +14,11 @@ import {
   User,
   Loader2,
   PencilLine,
-  ChevronDown
+  ChevronDown,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react'
-import { getAllUsers, updateUser } from '../../services/adminService'
+import { getAllUsers, updateUser, deleteUser } from '../../services/adminService'
 import toast from 'react-hot-toast'
 
 const ROLE_FILTERS = [
@@ -113,6 +115,9 @@ export default function ManageUsers() {
     role: 'patient'
   })
   const [saving, setSaving] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletingUser, setDeletingUser] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -164,6 +169,16 @@ export default function ManageUsers() {
   const handleCloseEditModal = () => {
     setShowEditModal(false)
     setEditingUser(null)
+  }
+
+  const handleOpenDeleteModal = (user) => {
+    setDeletingUser(user)
+    setShowDeleteModal(true)
+  }
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false)
+    setDeletingUser(null)
   }
 
   const handleFormChange = (event) => {
@@ -235,6 +250,21 @@ export default function ManageUsers() {
       toast.error(error.message || 'Failed to update user')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDeleteUser = async () => {
+    if (!deletingUser) return
+    setDeleting(true)
+    try {
+      await deleteUser(deletingUser.id)
+      setUsers((prev) => prev.filter((user) => user.id !== deletingUser.id))
+      toast.success('User deleted successfully')
+      handleCloseDeleteModal()
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete user')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -568,15 +598,25 @@ export default function ManageUsers() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-col items-start md:items-end gap-2 text-xs text-gray-500">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(user)}
-                            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-sm transition hover:border-indigo-300 hover:text-indigo-700 hover:bg-indigo-50 cursor-pointer"
-                          >
-                            <PencilLine className="h-3.5 w-3.5" />
-                            Edit user
-                          </button>
+                        <div className="flex flex-col items-start md:items-end gap-3 text-xs text-gray-500">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal(user)}
+                              className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-sm transition hover:border-indigo-300 hover:text-indigo-700 hover:bg-indigo-50 cursor-pointer"
+                            >
+                              <PencilLine className="h-3.5 w-3.5" />
+                              Edit user
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDeleteModal(user)}
+                              className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition hover:border-red-300 hover:bg-red-50 cursor-pointer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete
+                            </button>
+                          </div>
                           <span>
                             Added{' '}
                             <span className="font-medium text-gray-700 text-sm">
@@ -748,6 +788,76 @@ export default function ManageUsers() {
             </button>
           </div>
         </form>
+      </Modal>
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        title="Confirm deletion"
+        maxWidth="max-w-lg"
+      >
+        <div className="space-y-6">
+          <div className="flex items-start gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Delete {deletingUser?.name || 'this user'}?
+              </h3>
+              <p className="text-sm text-gray-600 leading-6">
+                This action immediately revokes the account’s access to MediQueue.
+                All queue history remains intact, but the user will no longer be able
+                to sign in.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-red-100 bg-red-50/60 p-4 text-sm text-red-700">
+            <dl className="space-y-1.5">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="font-medium">Full name</dt>
+                <dd>{deletingUser?.name || '—'}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="font-medium">Email</dt>
+                <dd>{deletingUser?.email || '—'}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="font-medium">Role</dt>
+                <dd className="capitalize">{deletingUser?.role || '—'}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={handleCloseDeleteModal}
+              disabled={deleting}
+              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Keep user
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteUser}
+              disabled={deleting}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4" />
+                  Delete user
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </Modal>
     </DashboardLayout>
   )
