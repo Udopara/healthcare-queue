@@ -15,7 +15,7 @@ const buildUserPayload = (user) => ({
 });
 
 export const register = async (req, res) => {
-  const { name, email, phone_number, password, role } = req.body;
+  const { name, email, phone_number, password, role, clinicId } = req.body;
 
   if (!name || !email || !password || !role) {
     return res
@@ -33,13 +33,33 @@ export const register = async (req, res) => {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    const user = await User.create({
-      name,
-      email,
-      phone_number,
-      password,
-      role,
-    });
+    if (role !== "doctor") {
+      await User.create({
+        name,
+        email,
+        phone_number,
+        password,
+        role,
+      });
+    } else {
+      if (!clinicId) {
+        return res
+          .status(400)
+          .json({ message: "clinicId is required for doctor registration" });
+      }
+      await User.create(
+        {
+          name,
+          email,
+          phone_number,
+          password,
+          role,
+        },
+        { context: { clinicId: clinicId } }
+      );
+    }
+
+    const user = await User.findOne({ where: { email } });
 
     const payload = buildUserPayload(user);
     const token = createAuthToken({

@@ -34,7 +34,7 @@ export const getQueueById = async (req, res) => {
 
 export const createQueue = async (req, res) => {
   try {
-    const { queue_name, clinic_id } = req.body;
+    const { queue_name, clinic_id, max_number } = req.body;
 
     if (!queue_name || !clinic_id) {
       return res
@@ -45,6 +45,7 @@ export const createQueue = async (req, res) => {
     const newQueue = await Queue.create({
       queue_name,
       clinic_id,
+      max_number,
     });
 
     return res.status(201).json(newQueue);
@@ -74,7 +75,7 @@ export const deleteQueue = async (req, res) => {
 export const updateQueue = async (req, res) => {
   try {
     const { id } = req.params;
-    const { queue_name, clinic_id, status } = req.body;
+    const { queue_name, clinic_id, max_number, status } = req.body;
 
     const queue = await Queue.findByPk(id);
     if (!queue) {
@@ -84,6 +85,7 @@ export const updateQueue = async (req, res) => {
     if (queue_name) queue.queue_name = queue_name;
     if (clinic_id) queue.clinic_id = clinic_id;
     if (status) queue.status = status;
+    if (max_number) queue.max_number = max_number;
 
     await queue.save();
     return res.json(queue);

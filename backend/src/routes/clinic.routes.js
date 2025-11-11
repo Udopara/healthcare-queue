@@ -4,6 +4,8 @@ import {
   getAllClinics,
   getClinicById,
   updateClinic,
+  getDoctorsByClinicId,
+  updateDoctorQueueSettings
 } from "../controllers/clinic.controller.js";
 
 const router = express.Router();
@@ -218,5 +220,63 @@ router.put("/:id", updateClinic);
  *         $ref: "#/components/responses/ServerError"
  */
 router.delete("/:id", deleteClinic);
+
+/**
+ * @swagger
+ * /api/clinics/{clinic_id}/doctors:
+ *   get:
+ *     summary: Get doctors by clinic ID
+ *     tags: [Clinics]
+ *     parameters:
+ *       - in: path
+ *         name: clinic_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The clinic identifier.
+ *     responses:
+ *       200:
+ *         description: A list of doctors for the clinic.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   doctor_id:
+ *                     type: integer
+ *                     example: 1
+ *                     description: Unique ID of the doctor
+ *                   clinic_id:
+ *                     type: integer
+ *                     example: 2
+ *                     description: ID of the clinic the doctor belongs to
+ *                   full_name:
+ *                     type: string
+ *                     example: "Dr. Jane Smith"
+ *                     description: Full name of the doctor
+ *                   phone_number:
+ *                     type: string
+ *                     example: "+250788123456"
+ *                     description: Doctor's contact number
+ *                   email:
+ *                     type: string
+ *                     example: "janesmith@example.com"
+ *                     description: Doctor's email address
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-11-11T10:00:00Z"
+ *                     description: Date and time when the record was created
+ *       404:
+ *         description: Resource not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/:clinic_id/doctors", getDoctorsByClinicId);
+
+
+
 
 export default router;
