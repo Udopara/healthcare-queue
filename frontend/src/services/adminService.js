@@ -4,8 +4,9 @@ import api from './api';
 export const getDashboardStats = async () => {
   try {
     // Fetch all data in parallel
-    const [clinics, users, queues, tickets] = await Promise.all([
+    const [clinics, patients, users, queues, tickets] = await Promise.all([
       api.get('/clinics'),
+      api.get('/patients'),
       api.get('/users'),
       api.get('/queues'),
       api.get('/tickets')
@@ -14,7 +15,7 @@ export const getDashboardStats = async () => {
     const stats = {
       totalClinics: clinics.data.length,
       totalDoctors: users.data.filter(u => u.role === 'doctor').length,
-      totalPatients: users.data.filter(u => u.role === 'patient').length,
+      totalPatients: patients.data.length,
       totalQueues: queues.data.length,
       totalTickets: tickets.data.length,
       activeTickets: tickets.data.filter(t => t.status === 'waiting' || t.status === 'serving').length,
@@ -38,6 +39,69 @@ export const getAllClinics = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching clinics:', error);
+    throw error;
+  }
+};
+
+// Update a clinic
+export const updateClinic = async (id, clinicData) => {
+  try {
+    const response = await api.put(`/clinics/${id}`, clinicData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response;
+      
+      switch (status) {
+        case 400:
+          throw new Error(data.message || 'Invalid clinic data. Please check your input.');
+        case 404:
+          throw new Error('Clinic not found.');
+        case 500:
+          throw new Error('Server error. Please try again later.');
+        default:
+          throw new Error(data.message || 'Failed to update clinic. Please try again.');
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.');
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.');
+    }
+  }
+};
+
+// Delete a clinic
+export const deleteClinic = async (id) => {
+  try {
+    const response = await api.delete(`/clinics/${id}`);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response;
+      
+      switch (status) {
+        case 404:
+          throw new Error('Clinic not found.');
+        case 500:
+          throw new Error('Server error. Please try again later.');
+        default:
+          throw new Error(data.message || 'Failed to delete clinic. Please try again.');
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.');
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.');
+    }
+  }
+};
+
+// Get all patients
+export const getAllPatients = async () => {
+  try {
+    const response = await api.get('/patients');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching patients:', error);
     throw error;
   }
 };
