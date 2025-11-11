@@ -112,7 +112,7 @@ export default function DashboardLayout({ children }) {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <Link to={config.logoHref} className="flex items-center">
+            <Link to={config.logoHref} className="flex items-center cursor-pointer">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <ListChecks className="w-5 h-5 text-white" />
               </div>
@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }) {
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-gray-500 hover:text-gray-700 cursor-pointer"
             >
               <X className="w-6 h-6" />
             </button>
@@ -137,7 +137,7 @@ export default function DashboardLayout({ children }) {
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
                     active
                       ? 'bg-indigo-50 text-indigo-700'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
@@ -169,7 +169,7 @@ export default function DashboardLayout({ children }) {
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
             >
               <LogOut className="w-5 h-5 mr-3" />
               Sign out
@@ -186,7 +186,7 @@ export default function DashboardLayout({ children }) {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden text-gray-500 hover:text-gray-700"
+                className="lg:hidden text-gray-500 hover:text-gray-700 cursor-pointer"
               >
                 <Menu className="w-6 h-6" />
               </button>

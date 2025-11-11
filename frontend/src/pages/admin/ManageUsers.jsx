@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
+import Modal from '../../components/ui/Modal'
 import {
   Users,
   ShieldCheck,
@@ -10,9 +11,12 @@ import {
   Calendar,
   RefreshCw,
   UserPlus,
-  User
+  User,
+  Loader2,
+  PencilLine,
+  ChevronDown
 } from 'lucide-react'
-import { getAllUsers } from '../../services/adminService'
+import { getAllUsers, updateUser } from '../../services/adminService'
 import toast from 'react-hot-toast'
 
 const ROLE_FILTERS = [
@@ -68,6 +72,8 @@ const SORT_OPTIONS = [
 ]
 
 const PAGE_SIZE = 8
+const ROLE_OPTIONS = ROLE_FILTERS.filter((filter) => filter.value !== 'all')
+const PHONE_REGEX = /^\+?[0-9()[\]\s.-]{7,20}$/
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
@@ -99,10 +105,34 @@ export default function ManageUsers() {
   const [sortBy, setSortBy] = useState('recent')
   const [refreshing, setRefreshing] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    phone_number: '',
+    role: 'patient'
+  })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     loadUsers()
   }, [])
+
+  useEffect(() => {
+    if (editingUser) {
+      setFormData({
+        name: editingUser.name || '',
+        phone_number: editingUser.phone_number || '',
+        role: editingUser.role || 'patient'
+      })
+    } else {
+      setFormData({
+        name: '',
+        phone_number: '',
+        role: 'patient'
+      })
+    }
+  }, [editingUser])
 
   const loadUsers = async (showToast = false) => {
     try {
@@ -124,6 +154,88 @@ export default function ManageUsers() {
   const handleRefresh = () => {
     setRefreshing(true)
     loadUsers(true)
+  }
+
+  const handleOpenEditModal = (user) => {
+    setEditingUser(user)
+    setShowEditModal(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false)
+    setEditingUser(null)
+  }
+
+  const handleFormChange = (event) => {
+    const { name, value } = event.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmitEdit = async (event) => {
+    event.preventDefault()
+    if (!editingUser) return
+
+    const trimmedName = formData.name.trim()
+    const trimmedPhone = formData.phone_number.trim()
+    const trimmedRole = formData.role.trim()
+
+    if (!trimmedName) {
+      toast.error('Name is required')
+      return
+    }
+
+    if (trimmedName.length < 2) {
+      toast.error('Name must be at least 2 characters')
+      return
+    }
+
+    if (!trimmedPhone) {
+      toast.error('Phone number is required')
+      return
+    }
+
+    if (!PHONE_REGEX.test(trimmedPhone)) {
+      toast.error('Please enter a valid phone number')
+      return
+    }
+
+    if (!trimmedRole) {
+      toast.error('Role is required')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const response = await updateUser(editingUser.id, {
+        name: trimmedName,
+        phone_number: trimmedPhone,
+        role: trimmedRole
+      })
+
+      const updatedUser = response?.user
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === editingUser.id
+            ? {
+                ...user,
+                ...updatedUser,
+                name: trimmedName,
+                phone_number: trimmedPhone,
+                role: trimmedRole
+              }
+            : user
+        )
+      )
+      toast.success('User updated successfully')
+      handleCloseEditModal()
+    } catch (error) {
+      toast.error(error.message || 'Failed to update user')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const summary = useMemo(() => {
@@ -264,7 +376,7 @@ export default function ManageUsers() {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
               <RefreshCw
                 className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`}
@@ -366,7 +478,7 @@ export default function ManageUsers() {
                   <button
                     key={filter.value}
                     onClick={() => setRoleFilter(filter.value)}
-                    className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition border ${
+                    className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition border cursor-pointer ${
                       active
                         ? 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm'
                         : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-200 hover:text-indigo-700'
@@ -457,6 +569,14 @@ export default function ManageUsers() {
                           </div>
                         </div>
                         <div className="flex flex-col items-start md:items-end gap-2 text-xs text-gray-500">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModal(user)}
+                            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-sm transition hover:border-indigo-300 hover:text-indigo-700 hover:bg-indigo-50 cursor-pointer"
+                          >
+                            <PencilLine className="h-3.5 w-3.5" />
+                            Edit user
+                          </button>
                           <span>
                             Added{' '}
                             <span className="font-medium text-gray-700 text-sm">
@@ -483,7 +603,7 @@ export default function ManageUsers() {
                     type="button"
                     onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                     disabled={currentPage === 1}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                   >
                     Previous
                   </button>
@@ -496,7 +616,7 @@ export default function ManageUsers() {
                           key={page}
                           type="button"
                           onClick={() => setCurrentPage(page)}
-                          className={`h-8 w-8 rounded-full text-xs font-semibold transition ${
+                          className={`h-8 w-8 rounded-full text-xs font-semibold transition cursor-pointer ${
                             isActive
                               ? 'bg-indigo-600 text-white shadow-sm'
                               : 'bg-gray-100 text-gray-600 hover:bg-indigo-50 hover:text-indigo-700'
@@ -513,7 +633,7 @@ export default function ManageUsers() {
                       setCurrentPage((page) => Math.min(totalPages, page + 1))
                     }
                     disabled={currentPage === totalPages}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 transition hover:border-indigo-200 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                   >
                     Next
                   </button>
@@ -523,6 +643,112 @@ export default function ManageUsers() {
           </div>
         )}
       </div>
+      <Modal
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        title={editingUser ? `Edit ${editingUser.name || 'user'}` : 'Edit user'}
+        maxWidth="max-w-lg"
+      >
+        <form onSubmit={handleSubmitEdit} className="space-y-5">
+          <div className="grid gap-4">
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Full name
+              </label>
+              <div className="relative">
+                <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  placeholder="Enter user name"
+                  className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 py-2 text-sm text-gray-700 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Email (read only)
+              </label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="email"
+                  value={editingUser?.email || ''}
+                  disabled
+                  className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 pl-9 pr-3 py-2 text-sm text-gray-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Phone number
+              </label>
+              <div className="relative">
+                <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="tel"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleFormChange}
+                  placeholder="+250123456789"
+                  className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 py-2 text-sm text-gray-700 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Role
+              </label>
+              <div className="relative">
+                <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleFormChange}
+                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white pl-9 pr-8 py-2 text-sm text-gray-700 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  {ROLE_OPTIONS.map((role) => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleCloseEditModal}
+              disabled={saving}
+              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving
+                </>
+              ) : (
+                'Save changes'
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </DashboardLayout>
   )
 }

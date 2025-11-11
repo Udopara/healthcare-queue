@@ -117,6 +117,33 @@ export const getAllUsers = async () => {
   }
 };
 
+// Update a user
+export const updateUser = async (id, userData) => {
+  try {
+    const response = await api.put(`/users/${id}`, userData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response;
+
+      switch (status) {
+        case 400:
+          throw new Error(data.message || 'Invalid user data. Please review the fields.');
+        case 404:
+          throw new Error('User not found.');
+        case 500:
+          throw new Error('Server error. Please try again later.');
+        default:
+          throw new Error(data.message || 'Failed to update user. Please try again.');
+      }
+    } else if (error.request) {
+      throw new Error('Cannot connect to server. Please check your connection.');
+    } else {
+      throw new Error('An unexpected error occurred. Please try again.');
+    }
+  }
+};
+
 // Get all queues
 export const getAllQueues = async () => {
   try {

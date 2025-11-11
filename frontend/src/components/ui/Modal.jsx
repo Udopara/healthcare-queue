@@ -43,7 +43,7 @@ export default function Modal({
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg cursor-pointer"
               aria-label="Close modal"
             >
               <X className="h-6 w-6" />
