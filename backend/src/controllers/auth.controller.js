@@ -1,7 +1,6 @@
 import { User, PasswordResetToken } from "../models/index.js";
-import { createAuthToken } from "../utils.js";
+import { createAuthToken, sendPasswordResetEmail } from "../utils/utils.js";
 import crypto from "crypto";
-import { sendPasswordResetEmail } from "../utils/email.js";
 
 const ALLOWED_ROLES = ["admin", "clinic", "doctor", "patient"];
 
