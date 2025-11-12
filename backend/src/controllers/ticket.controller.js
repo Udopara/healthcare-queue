@@ -1,6 +1,6 @@
 import { Ticket, Queue, User, Patient, Doctor } from "../models/index.js";
 import { Op } from "sequelize";
-import { sendNextUpEmail } from "../utils/email.js";
+import { sendNextUpEmail } from "../utils/utils.js";
 
 const mapTicketResponse = (ticket) => ({
   id: ticket.ticket_id,
