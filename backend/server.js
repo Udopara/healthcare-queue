@@ -11,6 +11,7 @@ import clinicRoutes from "./src/routes/clinic.routes.js";
 import ticketRoutes from "./src/routes/ticket.routes.js";
 import userRoutes from "./src/routes/user.routes.js";
 import doctorRoutes from "./src/routes/doctor.routes.js";
+import smsRoutes from "./src/routes/sms.routes.js";
 
 dotenv.config();
 const app = express();
@@ -67,6 +68,7 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/doctors", doctorRoutes);
+app.use("/api/sms", smsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(3000, () =>
