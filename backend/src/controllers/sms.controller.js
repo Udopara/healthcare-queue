@@ -16,12 +16,14 @@ const AfricasTalking = AT(credentials);
 const sms = AfricasTalking.SMS
 
 export const sendMessage = async (req, res) => {
-    const {to, message, from} = req.body;
+    const {to, message, _from} = req.body;
+
+    console.log("\n\n\n", _from, "\n\n\n")
 
     const options = {
         to: to,
         message: message,
-        from: from
+        from: _from
     }
 
     sms.send(options)
