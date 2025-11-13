@@ -1,4 +1,3 @@
-// src/pages/doctor/DoctorDashboard.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import KPICard from '../../components/admin/dashboard/KPICard';
