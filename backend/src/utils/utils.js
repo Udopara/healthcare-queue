@@ -26,12 +26,14 @@ setTimeout(() => {
   });
 }, 1000);
 
+//  Creates a JWT token for authentication, expires in 7 days by default
 export const createAuthToken = (payload, options = {}) =>
   jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "7d",
     ...options,
   });
 
+// Sends a password reset email to the user with a reset link
 export async function sendPasswordResetEmail(to, name, resetUrl) {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     throw new Error("Email configuration is missing. Please set GMAIL_USER and GMAIL_APP_PASSWORD in your .env file");
@@ -86,6 +88,7 @@ export async function sendPasswordResetEmail(to, name, resetUrl) {
   }
 }
 
+// Notifies the next person in queue that it's their turn
 export async function sendNextUpEmail(to, { queueName, currentTicketId }) {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     console.warn("Email configuration missing. Cannot send next-up notification.");
