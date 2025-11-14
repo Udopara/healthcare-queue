@@ -151,4 +151,143 @@ From `backend/package.json`:
 - Use a production-ready MySQL instance.
 - Configure a production `APP_URL` so password reset links are correct.
 
+---
+
+### Frontend (Vite + React)
+
+The frontend is a React application built with Vite and Tailwind CSS. It provides role-based dashboards for patients, clinics, doctors and admins.
+
+#### Frontend prerequisites
+- Node.js 18+ (same as backend)
+
+#### Install frontend dependencies
+From the repository root:
+
+```bash
+cd frontend
+npm install
+```
+
+#### Running the frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+- Vite will start the dev server (by default on `http://localhost:5173`).
+- The frontend talks to the backend via `VITE_API_BASE_URL`:
+  - If `VITE_API_BASE_URL` is **not** set, it defaults to `http://localhost:3000/api` (see `frontend/src/services/api.js`).
+  - To point to another backend, create `frontend/.env` with:
+
+    ```bash
+    VITE_API_BASE_URL=http://your-backend-host:3000/api
+    ```
+
+Make sure the backend is running **before** logging in or registering from the frontend.
+
+#### Frontend scripts (from `frontend/package.json`)
+
+- `npm run dev` – start Vite dev server.
+
+---
+
+### Running the full stack locally
+
+1. **Start the backend**
+   ```bash
+   cd backend
+   npm install         # if you haven't already
+   npm run dev
+   ```
+   The API will be available at `http://localhost:3000`.
+
+2. **Start the frontend**
+   ```bash
+   cd frontend
+   npm install         # if you haven't already
+   npm run dev
+   ```
+   The UI will be available at `http://localhost:5173`.
+
+3. **Optional: seed demo data**
+   ```bash
+   cd backend
+   npm run build:DB
+   ```
+   This will:
+   - Reset and recreate the database schema.
+   - Create a system admin:
+     - **Email**: `admin@mediqueue.com`
+     - **Password**: `admin`
+   - Create sample clinics, doctors, patients, queues and tickets.
+     - Non-admin demo users use the password `Password123!` with randomly generated emails/phone numbers (check the DB if you need specific accounts).
+
+---
+
+### Authentication & User Roles (Frontend)
+
+The frontend uses JWT-based authentication stored in `localStorage` and managed via `AuthContext` (`frontend/src/context/AuthContext.jsx`). On page reload, the app verifies the token with the backend (`/api/auth/me`) before restoring the session.
+
+#### Available roles
+
+The application supports four main roles:
+
+- **Patient (`patient`)**
+  - Default user role for people joining queues.
+  - After login: redirected to `/patient/dashboard`.
+  - Key pages:
+    - `Dashboard` (`/patient/dashboard`)
+    - `BrowseQueue` (`/patient/browse`)
+    - `JoinQueue` (`/patient/join`)
+    - `MyQueues` (`/patient/my-queues`)
+    - `Profile` (`/patient/profile`)
+    - `Help` (`/patient/help`)
+
+- **Clinic (`clinic`)**
+  - Represents a healthcare facility managing its own queues.
+  - After login: redirected to `/clinic/dashboard`.
+  - Key pages:
+    - `Dashboard` (`/clinic/dashboard`)
+    - `Queues` (`/clinic/queues`)
+    - `Patients` (`/clinic/patients`)
+    - `Reports` (`/clinic/reports`)
+    - `Settings` (`/clinic/settings`)
+
+- **Doctor (`doctor`)**
+  - Represents an individual provider working within a clinic.
+  - Typically created by seeding or via admin tooling.
+  - After login: redirected to `/doctor/dashboard`.
+  - Key pages:
+    - `Dashboard` (`/doctor/dashboard`)
+    - `Queues` (`/doctor/queues`)
+    - `Appointments` (`/doctor/appointments`)
+    - `Reports` (`/doctor/reports`)
+    - `Settings` (`/doctor/settings`)
+
+- **Admin (`admin`)**
+  - System-wide administrator responsible for managing clinics, doctors, and patients.
+  - After login: redirected to `/admin/dashboard`.
+  - Key pages:
+    - `Dashboard` (`/admin/dashboard`)
+    - `Clinics` (`/admin/clinics`)
+    - `Doctors` (`/admin/doctors`)
+    - `Users` (`/admin/users`)
+    - `Patients` (`/admin/patients`)
+    - `Reports` (`/admin/reports`)
+    - `Settings` (`/admin/settings`)
+
+#### Registration & login flows
+
+- The frontend registration form calls `POST /api/auth/register` and expects a `role` field (currently focused on **patient** and **clinic** flows).
+- Login calls `POST /api/auth/login` and stores:
+  - `token` – JWT used in the `Authorization` header.
+  - `user` – user profile including `role` and `linked_entity_id`.
+- On each reload, the app:
+  - Reads the token from `localStorage`.
+  - Calls `GET /api/auth/me` (via `authService.verifyUser`) to fetch fresh user data.
+  - Redirects to the appropriate dashboard based on `user.role` (see `RoleBasedRoutes.jsx`).
+
+If you add new roles or dashboards, update `RoleBasedRoutes.jsx` and the `getDashboardRoute` helper in `AuthContext` to keep routing consistent.
+
 
