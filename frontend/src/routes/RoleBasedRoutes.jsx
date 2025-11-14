@@ -12,11 +12,11 @@ import ClinicNotFound from '../pages/clinic/NotFound'
 
 // Patient Pages
 import PatientDashboard from '../pages/patient/Dashboard'
-import BrowseQueue from '../pages/patient/BrowseQueue'
+import BrowseDoctors from '../pages/patient/BrowseDoctors'
 import JoinQueue from '../pages/patient/JoinQueue'
 import MyQueues from '../pages/patient/MyQueues'
 import PatientProfile from '../pages/patient/Profile'
-import PatientHelp from '../pages/patient/Help'
+import AskAI from '../pages/patient/AskAI'
 import PatientNotFound from '../pages/patient/NotFound'
 
 // Doctor Pages
@@ -76,11 +76,11 @@ export default function RoleBasedRoutes() {
     return (
       <Routes>
         <Route path="/patient/dashboard" element={<PatientDashboard />} />
-        <Route path="/patient/browse" element={<BrowseQueue />} />
+        <Route path="/patient/browse" element={<BrowseDoctors />} />
         <Route path="/patient/join" element={<JoinQueue />} />
         <Route path="/patient/my-queues" element={<MyQueues />} />
         <Route path="/patient/profile" element={<PatientProfile />} />
-        <Route path="/patient/help" element={<PatientHelp />} />
+        <Route path="/patient/ask-ai" element={<AskAI />} />
         <Route path="/patient/*" element={<PatientNotFound />} />
         <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
       </Routes>

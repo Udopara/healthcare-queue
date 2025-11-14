@@ -1,5 +1,6 @@
 // Dummy data for development and testing
 // This file provides mock data that matches the backend structure
+import { doctors } from "@/pages/patient/Doc-data";
 
 export const dummyClinics = [
   {
@@ -132,7 +133,7 @@ export const generateUserGrowthTimeSeries = (days = 30) => {
 export const generateUserDistributionData = () => {
   return [
     { name: "Patients", value: 20, color: "#3b82f6" },
-    { name: "Doctors", value: 5, color: "#10b981" },
+    { name: "Doctors", value: doctors.length, color: "#10b981" },
     { name: "Clinics", value: 3, color: "#f59e0b" }
   ];
 };

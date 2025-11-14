@@ -78,7 +78,7 @@ export const doctors = [
 
   {
     img: {
-        src: "https://media.istockphoto.com/Id:/175399910/photo/confId:ent-african-american-female-doctor-isolated.jpg?s=612x612&w=0&k=20&c=3L5M1Cv-SRX1TvUf67kpiRCjkca4u4nQUaH7l3IFZkc=", 
+        src: "https://media.istockphoto.com/id/175399910/photo/confident-african-american-female-doctor-isolated.jpg?s=612x612&w=0&k=20&c=3L5M1Cv-SRX1TvUf67kpiRCjkca4u4nQUaH7l3IFZkc=", 
         alt: "Profile Pic" 
     },
     name: "Dr. Grace Mensah",
@@ -100,7 +100,7 @@ export const doctors = [
 
   {
     img: {
-        src: "https://media.istockphoto.com/Id:/1187318087/photo/portrait-of-happy-young-handsome-indian-man-doctor-smiling.jpg?s=612x612&w=0&k=20&c=PPGbJKhAjkab5waxx7GCleovSMuXh4KNW0ASqUkfbaU=", 
+        src: "https://t3.ftcdn.net/jpg/04/55/00/40/360_F_455004033_Wfjdp2yuHliEFKrdZ76DtnddnSmHM8s6.jpg", 
         alt: "Profile Pic" 
     },
     name: "Dr. Raj Mehta",
@@ -155,7 +155,7 @@ export const doctors = [
 
   {
     img: {
-        src: "https://media.istockphoto.com/Id:/1081389906/photo/portrait-of-african-medical-student-in-her-20s-smiling-towards-camera.jpg?s=612x612&w=0&k=20&c=7460TDMAwcCnLZKQdKkAO3sIwDdrH7nfYy5yyvSDmxY=", 
+        src: "https://t4.ftcdn.net/jpg/01/58/42/95/360_F_158429544_ZNxbbm0RidVmWE7PmnuHj9I2yIDSxKrN.jpg", 
         alt: "Profile Pic" 
     },
     name: "Dr. Diana Brown",
@@ -199,7 +199,7 @@ export const doctors = [
 
   {
     img: {
-        src: "https://www.harmonyrecoverync.com/wp-content/uploads/2024/06/jessie-seId:e-headshot.png", 
+        src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgWyVbNDQf7RhBzPl8pEX8ERwrVsMgsxHC6QiCBjfn-bE_9z5qjk_AWCv604YnlgePqEk&usqp=CAU", 
         alt: "Profile Pic" 
     },
     name: "Dr. Sophia Ikenna",
@@ -342,7 +342,7 @@ export const doctors = [
 
   {
     img: {
-        src: "https://media.istockphoto.com/Id:/92347250/photo/portrait-of-a-doctor.jpg?s=612x612&w=0&k=20&c=yKBhDy7ch065QV8mE4ocec8n9uec9VmBDmT137ZjHFo=", 
+        src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlfji8LlhjLXddYLJmlJTeFPlSdpMkBN-Qjh701DUzxbQlXAyN0V2n6zy0W9S65h-baDA&usqp=CAU", 
         alt: "Profile Pic" 
     },
     name: "Dr. Hank Shaw",
@@ -386,7 +386,7 @@ export const doctors = [
 
   {
     img: {
-        src: "https://media.istockphoto.com/Id:/1271101362/photo/smiling-male-doctor-with-stethoscope-in-hospital.jpg?s=612x612&w=0&k=20&c=m-EoR0bfpENnT2ntdMMi43q_UmxAUgcMbaVuzqktDI8=", 
+        src: "https://img.freepik.com/free-photo/front-view-female-doctor-wearing-stethoscope_23-2149856262.jpg", 
         alt: "Profile Pic" 
     },
     name: "Dr. Deji Olawole",
