@@ -1,35 +1,37 @@
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 
+dotenv.config();
 
 if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-  console.warn(" WARNING: GMAIL_USER or GMAIL_APP_PASSWORD is not set in environment variables!");
+  console.warn("WARNING: GMAIL_USER or GMAIL_APP_PASSWORD is not set in environment variables!");
 }
 
 const transporter = nodemailer.createTransport({
-  service: "gmail", 
+  service: "gmail",
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
 });
 
-
 setTimeout(() => {
-  transporter.verify((error, success) => {
+  transporter.verify((error) => {
     if (error) {
       console.error("Email transporter verification failed:", error.message);
     } else {
       console.log("Email transporter is ready to send messages");
     }
   });
-}, 1000); 
+}, 1000);
 
-/**
- * Send password reset email
- * @param {string} to 
- * @param {string} name 
- * @param {string} resetUrl 
- */
+export const createAuthToken = (payload, options = {}) =>
+  jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+    ...options,
+  });
+
 export async function sendPasswordResetEmail(to, name, resetUrl) {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     throw new Error("Email configuration is missing. Please set GMAIL_USER and GMAIL_APP_PASSWORD in your .env file");
@@ -55,14 +57,14 @@ export async function sendPasswordResetEmail(to, name, resetUrl) {
     `,
     text: `
       Hello ${name || "there"},
-      
+
       You requested a password reset for your Healthcare Queue account.
-      
+
       Please visit the following link to reset your password:
       ${resetUrl}
-      
+
       This link will expire in 1 hour.
-      
+
       If you didn't request this, please ignore this email.
     `,
   };
@@ -84,13 +86,6 @@ export async function sendPasswordResetEmail(to, name, resetUrl) {
   }
 }
 
-/**
- * Send next-in-line notification
- * @param {string} to - recipient email
- * @param {object} context - info to personalize message
- * @param {string} context.queueName
- * @param {string} context.currentTicketId
- */
 export async function sendNextUpEmail(to, { queueName, currentTicketId }) {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     console.warn("Email configuration missing. Cannot send next-up notification.");
@@ -114,18 +109,18 @@ export async function sendNextUpEmail(to, { queueName, currentTicketId }) {
     `,
     text: `
       Hello,
-      
+
       You're next in line for ${queueName || "the queue"}.
-      
+
       Current ticket being served: ${currentTicketId}
-      
+
       Please proceed to the service area. If you cannot make it, reply to this email.
     `,
   };
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("Next-up email sent successfully to ${to}");
+    console.log(`Next-up email sent successfully to ${to}`);
     return info;
   } catch (error) {
     console.error("Failed to send next-up email:", error);

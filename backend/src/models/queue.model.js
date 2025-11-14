@@ -27,6 +27,10 @@ export default (sequelize) => {
         type: STRING(20),
         defaultValue: null,
       },
+      max_number:{
+        type: INTEGER,
+        allowNull: false,
+      },
       created_at: {
         type: DATE,
         defaultValue: NOW,
