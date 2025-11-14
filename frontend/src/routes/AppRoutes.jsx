@@ -15,6 +15,12 @@ import RegisterPage from '../pages/auth/RegisterPage'
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage'
 
+// Clinic Pages
+import ClinicDashboard from '../pages/clinic/ClinicDashboard'
+import DoctorManagement from '../pages/clinic/Doctor-Managment/DoctorManagment'
+import ClinicReports from '../pages/clinic/ClinicReports'
+import RecentActivity from '../pages/clinic/RecentActivity'
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -52,6 +58,40 @@ export default function AppRoutes() {
           <PublicRoute>
             <ResetPasswordPage />
           </PublicRoute>
+        }
+      />
+
+      {/* Clinic Routes */}
+      <Route
+        path="/clinic/dashboard"
+        element={
+          <ProtectedRoute>
+            <ClinicDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clinic/doctors"
+        element={
+          <ProtectedRoute>
+            <DoctorManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clinic/reports"
+        element={
+          <ProtectedRoute>
+            <ClinicReports />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clinic/activity"
+        element={
+          <ProtectedRoute>
+            <RecentActivity />
+          </ProtectedRoute>
         }
       />
 
