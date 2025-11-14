@@ -42,6 +42,7 @@ export default (sequelize) => {
     }
   );
 
+   // Marks current ticket as completed and moves the next waiting ticket to serving
    Queue.callNext = async function (queue_id, models) {
      const { Ticket } = models;
 

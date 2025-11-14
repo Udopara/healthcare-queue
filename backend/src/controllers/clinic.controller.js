@@ -1,6 +1,7 @@
 import { Clinic } from "../models/index.js";
 import { Doctor } from "../models/index.js";
 
+// Fetches all clinics and returns basic info (id, name, email, phone)
 export const getAllClinics = async (req, res) => {
   try {
     const clinics = await Clinic.findAll();
@@ -18,6 +19,7 @@ export const getAllClinics = async (req, res) => {
   }
 };
 
+// Gets a single clinic by ID
 export const getClinicById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -41,6 +43,7 @@ export const getClinicById = async (req, res) => {
   }
 };
 
+// Updates clinic details - only updates fields that are provided
 export const updateClinic = async (req, res) => {
   try {
     const { id } = req.params;
@@ -73,6 +76,7 @@ export const updateClinic = async (req, res) => {
   }
 };
 
+// Deletes a clinic from the database
 export const deleteClinic = async (req, res) => {
   try {
     const { id } = req.params;
@@ -91,6 +95,7 @@ export const deleteClinic = async (req, res) => {
   }
 };
 
+// Returns all doctors associated with a specific clinic
 export const getDoctorsByClinicId = async (req, res) => {
   try {
     const { clinic_id } = req.params;
@@ -103,6 +108,7 @@ export const getDoctorsByClinicId = async (req, res) => {
   }
 };
 
+// Updates a doctor's max queue size setting
 export const updateDoctorQueueSettings = async (req, res) => {
   try {
     const { doctor_id } = req.params;

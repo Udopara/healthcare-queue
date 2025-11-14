@@ -43,6 +43,7 @@ export default (sequelize) => {
       timestamps: false,
 
       hooks: {
+        // Generates a unique ticket ID in format: queue_id-MMYY-#### before creating
         beforeCreate: async (ticket) => {
           const now = new Date();
           const month = String(now.getMonth() + 1).padStart(2, "0");

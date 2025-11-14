@@ -1,5 +1,6 @@
 import { Doctor } from "../models/index.js";
 
+// Fetches all doctors in the system
 export const getAllDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.findAll();
@@ -10,6 +11,7 @@ export const getAllDoctors = async (req, res) => {
   }
 };
 
+// Gets a single doctor by their ID
 export const getDoctorById = async (req, res) => {
   try {
     const { id } = req.params;
