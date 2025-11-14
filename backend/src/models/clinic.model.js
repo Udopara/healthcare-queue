@@ -15,6 +15,7 @@ export default (sequelize) => {
         type: STRING(100),
         allowNull: false,
       },
+      
       email: {
         type: STRING(100),
         allowNull: false,

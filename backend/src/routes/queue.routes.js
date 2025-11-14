@@ -1,5 +1,14 @@
 import express from "express";
-import { createQueue, getAllQueues, getQueueById, updateQueue, deleteQueue, callNextInQueue } from "../controllers/queue.controller.js";
+import {
+  createQueue,
+  getAllQueues,
+  getQueueById,
+  updateQueue,
+  deleteQueue,
+  callNextInQueue,
+  getQueueTickets,
+} from "../controllers/queue.controller.js";
+import { authenticateToken } from "../middlewares/auth.js";
 const router = express.Router();
 
 /**
@@ -30,6 +39,10 @@ const router = express.Router();
  *           type: integer
  *           description: Clinic that owns the queue.
  *           example: 2
+ *         max_number:
+ *           type: integer
+ *           description: Maximum number of patients allowed in the queue.
+ *           example: 25
  *         created_at:
  *           type: string
  *           format: date-time
@@ -40,6 +53,7 @@ const router = express.Router();
  *       required:
  *         - queue_name
  *         - clinic_id
+ *         - max_number
  *       properties:
  *         queue_name:
  *           type: string
@@ -49,6 +63,10 @@ const router = express.Router();
  *           type: integer
  *           description: Clinic that owns the queue.
  *           example: 2
+ *         max_number:
+ *           type: integer
+ *           description: Maximum number of patients allowed in the queue.
+ *           example: 25
  *     QueueUpdateInput:
  *       type: object
  *       properties:
@@ -58,6 +76,10 @@ const router = express.Router();
  *         clinic_id:
  *           type: integer
  *           example: 4
+ *         max_number:
+ *           type: integer
+ *           description: Maximum number of patients allowed in the queue.
+ *           example: 25
  *         status:
  *           type: string
  *           enum: [open, closed, paused]
@@ -202,6 +224,47 @@ router.get("/", getAllQueues);
  *         $ref: "#/components/responses/ServerError"
  */
 router.get("/:id", getQueueById);
+
+/**
+ * @swagger
+ * /api/queues/{queue_id}/tickets:
+ *   get:
+ *     summary: Get tickets belonging to a specific queue
+ *     tags: [Queues]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: queue_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Queue identifier.
+ *     responses:
+ *       200:
+ *         description: Tickets retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/QueueTicket"
+ *       401:
+ *         description: Missing or invalid token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MessageResponse"
+ *       403:
+ *         description: Access denied. Insufficient permissions.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MessageResponse"
+ *       500:
+ *         $ref: "#/components/responses/ServerError"
+ */
+router.get("/:queue_id/tickets", authenticateToken, getQueueTickets);
 
 /**
  * @swagger
