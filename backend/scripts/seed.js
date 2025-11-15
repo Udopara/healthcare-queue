@@ -98,6 +98,7 @@ const ensureEntity = async (promise, role) => {
         const queue = await Queue.create({
           queue_name: faker.helpers.arrayElement(QUEUE_NAMES),
           clinic_id: clinic.clinic_id,
+          max_number: faker.number.int({ min: 10, max: 30 }),
         });
         queues.push(queue);
       }

@@ -1,5 +1,6 @@
 import { Queue, Ticket } from "../models/index.js";
 
+// Gets all queues, optionally filtered by clinic_id if provided
 export const getAllQueues = async (req, res) => {
   const { clinic_id } = req.query;
   try {
@@ -16,6 +17,7 @@ export const getAllQueues = async (req, res) => {
   }
 };
 
+// Fetches a single queue by its ID
 export const getQueueById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -32,9 +34,10 @@ export const getQueueById = async (req, res) => {
   }
 };
 
+// Creates a new queue for a clinic
 export const createQueue = async (req, res) => {
   try {
-    const { queue_name, clinic_id } = req.body;
+    const { queue_name, clinic_id, max_number } = req.body;
 
     if (!queue_name || !clinic_id) {
       return res
@@ -45,6 +48,7 @@ export const createQueue = async (req, res) => {
     const newQueue = await Queue.create({
       queue_name,
       clinic_id,
+      max_number,
     });
 
     return res.status(201).json(newQueue);
@@ -54,6 +58,7 @@ export const createQueue = async (req, res) => {
   }
 };
 
+// Deletes a queue from the system
 export const deleteQueue = async (req, res) => {
   try {
     const { id } = req.params;
@@ -71,10 +76,11 @@ export const deleteQueue = async (req, res) => {
   }
 };
 
+// Updates queue properties like name, clinic, max capacity, or status
 export const updateQueue = async (req, res) => {
   try {
     const { id } = req.params;
-    const { queue_name, clinic_id, status } = req.body;
+    const { queue_name, clinic_id, max_number, status } = req.body;
 
     const queue = await Queue.findByPk(id);
     if (!queue) {
@@ -84,6 +90,7 @@ export const updateQueue = async (req, res) => {
     if (queue_name) queue.queue_name = queue_name;
     if (clinic_id) queue.clinic_id = clinic_id;
     if (status) queue.status = status;
+    if (max_number) queue.max_number = max_number;
 
     await queue.save();
     return res.json(queue);
@@ -93,6 +100,26 @@ export const updateQueue = async (req, res) => {
   }
 };
 
+// Returns all tickets for a specific queue - only doctors, clinics, and admins can access
+export const getQueueTickets = async (req, res) => {
+  const {role} = req.user;
+  if (!["doctor", "clinic", "admin"].includes(role)) {
+    return res
+      .status(403)
+      .json({ message: "Access denied. Insufficient permissions." });
+  }
+
+  try {
+    const { queue_id } = req.params;
+    const tickets = await Ticket.findAll({ where: { queue_id } });
+    return res.json(tickets);
+  } catch (error) {
+    console.error("Error fetching tickets for queue:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// Calls the next person in the queue (moves to serving status)
 export const callNextInQueue = async (req, res) => {
   try {
     const queue_id = req.params.id;

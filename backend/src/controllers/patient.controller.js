@@ -1,5 +1,6 @@
 import { Patient } from "../models/index.js";
 
+// Returns all patients with their basic info (id, name, email, phone)
 export const getAllPatients = async (req, res) => {
   try {
     const patients = await Patient.findAll();
@@ -18,6 +19,7 @@ export const getAllPatients = async (req, res) => {
   }
 };
 
+// Fetches a single patient by ID
 export const getPatientById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -42,6 +44,7 @@ export const getPatientById = async (req, res) => {
 };
 
 
+// Updates patient information - only changes fields that are sent in the request
 export const updatePatient = async (req, res) => {
   try {
     const { id } = req.params;
@@ -74,6 +77,7 @@ export const updatePatient = async (req, res) => {
   }
 };
 
+// Removes a patient from the database
 export const deletePatient = async (req, res) => {
   try {
     const { id } = req.params;

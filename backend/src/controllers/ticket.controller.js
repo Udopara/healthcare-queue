@@ -1,7 +1,8 @@
-import { Ticket, Queue, User, Patient } from "../models/index.js";
+import { Ticket, Queue, User, Patient, Doctor } from "../models/index.js";
 import { Op } from "sequelize";
-import { sendNextUpEmail } from "../utils/email.js";
+import { sendNextUpEmail } from "../utils/utils.js";
 
+// Formats ticket data for API responses
 const mapTicketResponse = (ticket) => ({
   id: ticket.ticket_id,
   ticket_number: ticket.ticket_number,
@@ -13,11 +14,13 @@ const mapTicketResponse = (ticket) => ({
   estimated_wait_time: ticket.estimated_wait_time,
 });
 
+// Gets the patient ID linked to a user account
 const getPatientId = async (userId) => {
   const user = await User.findByPk(userId);
   return user?.linked_entity_id || null;
 };
 
+// Checks if user is authenticated, returns user ID or null
 const ensureAuthenticatedUser = (req, res) => {
   if (!req.user?.id) {
     res.status(401).json({ message: "Unauthorized" });
@@ -26,11 +29,13 @@ const ensureAuthenticatedUser = (req, res) => {
   return req.user.id;
 };
 
+// Creates a new ticket for a queue - only patients can create tickets
+// Retries up to 3 times if there's a unique constraint error (ticket number collision)
 export const createTicket = async (req, res) => {
   const userId = ensureAuthenticatedUser(req, res);
   if (userId === null) return;
 
-  if (req.user.role !== "patient") {
+  if (!["patient","admin"].includes(req.user.role)) {
     return res
       .status(403)
       .json({ message: "Forbidden: Only patients can create tickets" });
@@ -49,6 +54,16 @@ export const createTicket = async (req, res) => {
     const queue = await Queue.findByPk(queue_id);
     if (!queue) {
       return res.status(404).json({ message: "Queue not found" });
+    }
+
+    const ticketsCount = await Ticket.count({
+      where: {
+        queue_id,
+      }
+    });
+
+    if (queue.max_number > 0 && ticketsCount >= queue.max_number) {
+      return res.status(400).json({ message: "Queue has reached its maximum capacity." });
     }
 
     let ticket = null;
@@ -84,6 +99,7 @@ export const createTicket = async (req, res) => {
   }
 };
 
+// Gets tickets - admins see all, patients only see their own
 export const getTickets = async (req, res) => {
   const { role } = req.user;
   const userId = ensureAuthenticatedUser(req, res);
@@ -125,6 +141,7 @@ export const getTickets = async (req, res) => {
   }
 };
 
+// Fetches a single ticket - admins can see any, patients only their own
 export const getTicketById = async (req, res) => {
   const { role } = req.user;
   const userId = ensureAuthenticatedUser(req, res);
@@ -173,6 +190,7 @@ export const getTicketById = async (req, res) => {
   }
 };
 
+// Cancels a ticket - only the ticket owner can cancel, and completed tickets can't be cancelled
 export const cancelTicket = async (req, res) => {
   const { role } = req.user;
   const userId = ensureAuthenticatedUser(req, res);
@@ -220,6 +238,8 @@ export const cancelTicket = async (req, res) => {
   }
 };
 
+// Updates ticket status - only clinics can do this
+// When status changes to "serving", sends email to the next person in line
 export const updateTicketStatusByClinic = async (req, res) => {
   if (req.user?.role !== "clinic") {
     return res.status(403).json({ message: "Only clinics can update ticket status" });
