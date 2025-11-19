@@ -1,12 +1,19 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
-import { doctors } from './Doc-data';
 import { Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function BrowseDoctors() {
 
+  const [doctors, setDoctors] = useState([])
   const [searchDepartment, setSearchDepartment] = useState("")
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/doctors")
+      .then((res) => res.json())
+      .then((data) => setDoctors(data))
+      .catch((err) => console.error("Failed to fetch doctors:", err));
+  }, []);
 
   const deptSearch = doctors.filter((dept) => dept.department.toLowerCase().includes(searchDepartment.toLowerCase()));
 
@@ -32,18 +39,18 @@ export default function BrowseDoctors() {
             {deptSearch.length > 0 ? (
               deptSearch.map((doc, id) => {
                 let availabilityColor = "";
-                if (doc.Availability === "Available") availabilityColor = "text-green-600";
-                else if (doc.Availability === "Busy") availabilityColor = "text-amber-600";
-                else if (doc.Availability === "Offline") availabilityColor = "text-red-600";
+                if (doc.availability === "Available") availabilityColor = "text-green-600";
+                else if (doc.availability === "Busy") availabilityColor = "text-amber-600";
+                else if (doc.availability === "Offline") availabilityColor = "text-red-600";
                 
                 return (
-                <div key={id} className='sm:w-36 md:w-64 lg:w-56 flex flex-col justify-between  h-72 border border-gray-300 border-l border-l-indigo-600 rounded-2xl p-5 shadow-xl hover:cursor-pointer'>
+                <div key={doc.doctor_id} className='sm:w-36 md:w-64 lg:w-56 flex flex-col justify-between  h-72 border border-gray-300 border-l border-l-indigo-600 rounded-2xl p-5 shadow-xl hover:cursor-pointer'>
                   <div>
-                    <img src={doc.img.src} alt="" className='w-25 h-25 mb-4 rounded-full border border-indigo-600 object-cover'/>
-                    <p className='font-semibold'>{doc.name}</p>
+                    <img src={doc.img_src} alt="" className='w-25 h-25 mb-4 rounded-full border border-indigo-600 object-cover'/>
+                    <p className='font-semibold'>{doc.full_name}</p>
                     <p className='text-indigo-600 font-semibold'>{doc.department}</p>
-                    <p className='font-normal'>Id: {doc.Id}</p>
-                    <p>Status: <span className={`font-semibold ${availabilityColor}`}>{doc.Availability}</span></p>
+                    <p className='font-normal'>Id: {doc.doctor_id}</p>
+                    <p>Status: <span className={`font-semibold ${availabilityColor}`}>{doc.availability}</span></p>
                   </div>
                   <Link to="/patient/join" className='bg-indigo-600 text-white w-24 pl-2.5 h-6 rounded-2xl hover:cursor-pointer'>Book now</Link>
                   
