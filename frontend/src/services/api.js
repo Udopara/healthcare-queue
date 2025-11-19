@@ -29,10 +29,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear auth and redirect to login
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/auth/login'
+      // Only auto-logout/redirect if there WAS a token (i.e. user was logged in)
+      // This prevents the login page from refreshing immediately on bad credentials.
+      const token = getToken()
+
+      if (token) {
+        // Unauthorized with existing session - clear auth and redirect to login
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+
+        if (window.location.pathname !== '/auth/login') {
+          window.location.href = '/auth/login'
+        }
+      }
     }
     return Promise.reject(error)
   }

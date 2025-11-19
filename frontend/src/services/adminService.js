@@ -5,11 +5,11 @@ export const getDashboardStats = async () => {
   try {
     // Fetch all data in parallel
     const [clinics, patients, users, queues, tickets] = await Promise.all([
-      api.get('/clinics'),
-      api.get('/patients'),
+      // api.get('/clinics'),
+      // api.get('/patients'),
       api.get('/users'),
-      api.get('/queues'),
-      api.get('/tickets')
+      // api.get('/queues'),
+      // api.get('/tickets')
     ]);
 
     const stats = {
