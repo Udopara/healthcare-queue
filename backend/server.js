@@ -1,18 +1,28 @@
 import dotenv from "dotenv";
 import express from "express";
-
+import cors from "cors"; // <- added CORS
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { sequelize } from "./src/models/index.js";
+
 import patientRoutes from "./src/routes/patient.routes.js";
 import queueRoutes from "./src/routes/queue.routes.js";
 import authRoutes from "./src/routes/auth.routes.js";
 import clinicRoutes from "./src/routes/clinic.routes.js";
+import doctorRoutes from "./src/routes/doctor.routes.js"
 import ticketRoutes from "./src/routes/ticket.routes.js";
 import userRoutes from "./src/routes/user.routes.js";
 
 dotenv.config();
 const app = express();
+
+// Enable CORS for frontend running at 5173
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+
+// Middleware to parse JSON
 app.use(express.json());
 
 (async () => {
@@ -51,22 +61,22 @@ const specs = swaggerJsdoc({
   apis: ["./src/routes/*.js"], // path to your route files
 });
 
-
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-
+// Test endpoint
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+// Routes
 app.use("/api/patients", patientRoutes);
 app.use("/api/clinics", clinicRoutes);
-app.use("/api/queues", queueRoutes)
+app.use("/api/doctors", doctorRoutes);
+app.use("/api/queues", queueRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(3000, () =>
-  console.log("Server running on port " + PORT)
-);
+app.listen(PORT, () => console.log("Server running on port " + PORT));
