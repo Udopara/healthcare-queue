@@ -1,33 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 const RecentActivity = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const clinicData = {
     id: 'CLIN-789123',
     name: 'City Medical Center',
     email: 'admin@citymedical.com',
     phone: '+1 (555) 123-4567'
-  };
-
-  const tabs = [
-    { id: 'dashboard', path: '/clinic/dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'queues', path: '/clinic/queues', label: 'Queues', icon: '👥' },
-    { id: 'doctors', path: '/clinic/doctors', label: 'Doctors', icon: '👨‍⚕️' },
-    { id: 'reports', path: '/clinic/reports', label: 'Reports', icon: '📈' },
-    { id: 'activity', path: '/clinic/activity', label: 'Recent Activity', icon: '🔄' }
-  ];
-
-  const getActiveTab = () => {
-    const currentPath = location.pathname;
-    const activeTab = tabs.find(tab => currentPath.startsWith(tab.path));
-    return activeTab?.id || 'dashboard';
-  };
-
-  const handleTabClick = (tabPath) => {
-    navigate(tabPath);
   };
 
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
@@ -221,7 +201,8 @@ const RecentActivity = () => {
   };
 
   return (
-    <div className="dashboard">
+    <DashboardLayout>
+      <div className="dashboard">
       {/* Notification Popup */}
       {notification.show && (
         <div className={`notification ${notification.type}`}>
@@ -255,58 +236,7 @@ const RecentActivity = () => {
         </div>
       </header>
 
-      {/* Main Content Grid */}
-      <div className="main-content">
-        {/* Sidebar Navigation */}
-        <aside className="sidebar">
-          {/* Navigation Tabs */}
-          <nav className="nav-tabs">
-            <h3>NAVIGATION</h3>
-            <div className="tabs-container">
-              {tabs.map((tab) => {
-                const isActive = getActiveTab() === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabClick(tab.path)}
-                    className={`tab-button ${isActive ? 'active' : ''}`}
-                  >
-                    <span className="tab-icon">{tab.icon}</span>
-                    <span className="tab-label">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Activity Metrics */}
-          <div className="stats-section">
-            <h3>Activity Metrics</h3>
-            <div className="visit-stats">
-              <div className="overall-stat">
-                <div className="stat-value">70%</div>
-                <div className="stat-label">Team Activity</div>
-              </div>
-              {activityMetrics.map((metric, index) => (
-                <div key={metric.name} className="department-stat">
-                  <div className="stat-bar">
-                    <div 
-                      className="stat-progress" 
-                      style={{
-                        width: `${Math.min((metric.value / (metric.name === 'Tasks Completed' ? 50 : metric.name === 'Active Projects' ? 10 : 100)) * 100, 100)}%`,
-                        backgroundColor: metric.color
-                      }}
-                    ></div>
-                  </div>
-                  <span className="stat-text">{metric.name} {metric.change}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="content-area">
+      <div className="content-area">
           {/* Page Header */}
           <div className="page-header">
             <h2>Recent Activity Timeline</h2>
@@ -392,14 +322,13 @@ const RecentActivity = () => {
               </button>
             </div>
           </div>
-        </main>
       </div>
 
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+          font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           position: relative;
         }
         
@@ -418,18 +347,18 @@ const RecentActivity = () => {
         }
         
         .notification.success {
-          border-color: #27ae60;
-          background: #d4f4e1;
+          border-color: #10b981;
+          background: #ecfdf5;
         }
         
         .notification.warning {
-          border-color: #f39c12;
-          background: #fef5e7;
+          border-color: #f59e0b;
+          background: #fffbeb;
         }
         
         .notification.info {
-          border-color: #3498db;
-          background: #e3f2fd;
+          border-color: #4f46e5;
+          background: #eef2ff;
         }
         
         .notification-content {
@@ -523,7 +452,7 @@ const RecentActivity = () => {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: linear-gradient(45deg, #3498db, #9b59b6);
+          background: linear-gradient(135deg, #4f46e5, #9333ea);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -532,14 +461,11 @@ const RecentActivity = () => {
         }
         
         .user-status {
-          color: #27ae60;
+          color: #10b981;
           font-weight: 500;
         }
         
         .main-content {
-          display: grid;
-          grid-template-columns: 280px 1fr;
-          gap: 0;
           max-width: 1400px;
           margin: 0 auto;
           padding: 30px;
@@ -689,24 +615,14 @@ const RecentActivity = () => {
         }
         
         .metric-card {
-          padding: 25px;
+          padding: 24px;
           border-radius: 16px;
           display: flex;
           align-items: center;
           gap: 15px;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .metric-card.primary {
-          background: linear-gradient(135deg, #a8e6cf, #88d3a0);
-        }
-        
-        .metric-card.success {
-          background: linear-gradient(135deg, #ffd3b6, #ffaaa5);
-        }
-        
-        .metric-card.info {
-          background: linear-gradient(135deg, #a0c4ff, #74b9ff);
+          border: 1px solid #e0e7ff;
+          background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+          box-shadow: 0 6px 18px rgba(79, 70, 229, 0.08);
         }
         
         .metric-icon {
@@ -717,11 +633,13 @@ const RecentActivity = () => {
           font-size: 32px;
           font-weight: 700;
           margin-bottom: 5px;
+          color: #111827;
         }
         
         .metric-label {
           font-size: 14px;
           font-weight: 600;
+          color: #4b5563;
         }
         
         .metric-change {
@@ -789,7 +707,7 @@ const RecentActivity = () => {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3498db, #9b59b6);
+          background: linear-gradient(135deg, #4f46e5, #9333ea);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -837,18 +755,18 @@ const RecentActivity = () => {
         }
         
         .activity-badge.success {
-          background: #d4edda;
-          color: #155724;
+          background: #ecfdf5;
+          color: #047857;
         }
         
         .activity-badge.info {
-          background: #e3f2fd;
-          color: #1976d2;
+          background: #eef2ff;
+          color: #4f46e5;
         }
         
         .activity-badge.warning {
-          background: #fff3cd;
-          color: #856404;
+          background: #fffbeb;
+          color: #92400e;
         }
         
         .empty-state {
@@ -912,22 +830,22 @@ const RecentActivity = () => {
         }
         
         .btn-primary {
-          background: linear-gradient(135deg, #3498db, #2980b9);
+          background: linear-gradient(135deg, #4338ca, #4f46e5);
           color: white;
         }
         
         .btn-secondary {
-          background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+          background: #1f2937;
           color: white;
         }
         
         .btn-success {
-          background: linear-gradient(135deg, #27ae60, #2ecc71);
+          background: linear-gradient(135deg, #059669, #10b981);
           color: white;
         }
         
         .btn-warning {
-          background: linear-gradient(135deg, #f39c12, #e67e22);
+          background: linear-gradient(135deg, #f59e0b, #d97706);
           color: white;
         }
         
@@ -936,7 +854,8 @@ const RecentActivity = () => {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

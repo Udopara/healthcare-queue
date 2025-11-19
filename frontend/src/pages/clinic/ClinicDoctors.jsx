@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 const ClinicDoctors = () => {
   const doctors = [
@@ -32,48 +33,42 @@ const ClinicDoctors = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">Medical Staff</h1>
-          <p className="text-blue-700 text-lg">Manage your clinic's doctors and specialists</p>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Medical Staff</h1>
+          <p className="text-gray-600">Manage your clinic's doctors and specialists</p>
         </div>
 
-        <hr className="border-blue-200 my-6" />
-
-        {/* Doctor List */}
         <div className="space-y-6">
           {doctors.map((doctor) => (
-            <div key={doctor.id} className="bg-white border border-blue-200 rounded-lg p-6">
+            <div key={doctor.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{doctor.avatar}</span>
+                  <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-semibold">
+                    {doctor.avatar}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-blue-900">{doctor.name}</h3>
-                    <p className="text-blue-700 font-medium">{doctor.specialty}</p>
+                    <h3 className="text-xl font-semibold text-gray-900">{doctor.name}</h3>
+                    <p className="text-sm text-gray-600">{doctor.specialty}</p>
                   </div>
                 </div>
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-full text-xs font-semibold">
                   ACTIVE
                 </span>
               </div>
 
-              <div className="text-blue-800 space-y-1 mb-4">
-                <p className="text-sm">ID: {doctor.id}</p>
+              <div className="text-gray-700 space-y-1 mb-4">
+                <p className="text-sm font-medium">ID: {doctor.id}</p>
                 <p className="text-sm">{doctor.email}</p>
                 <p className="text-sm">{doctor.phone}</p>
               </div>
 
-              <hr className="border-blue-200 my-4" />
-
               <div className="flex space-x-4">
-                <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                <button className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
                   Edit
                 </button>
-                <button className="text-red-600 hover:text-red-800 font-medium text-sm">
+                <button className="text-rose-600 hover:text-rose-800 text-sm font-medium">
                   Remove
                 </button>
               </div>
@@ -81,14 +76,13 @@ const ClinicDoctors = () => {
           ))}
         </div>
 
-        {/* Add New Doctor Button */}
-        <div className="mt-8">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+        <div>
+          <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition">
             Add New Doctor
           </button>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

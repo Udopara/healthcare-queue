@@ -1,4 +1,3 @@
-import ClinicLayout from '../pages/clinic/ClinicLayout';
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -57,36 +56,20 @@ export default function RoleBasedRoutes() {
   
   const dashboardRoute = dashboardRoutes[role] || '/patient/dashboard'
 
-// Clinic Routes
-if (role === 'clinic') {
-  return (
-    <Routes>
-      <Route path="/clinic/dashboard" element={
-        <ClinicLayout>
-          <ClinicDashboard />
-        </ClinicLayout>
-      } />
-      <Route path="/clinic/queues" element={<ClinicQueues />} />
-      <Route path="/clinic/doctors" element={
-        <ClinicLayout>
-          <ClinicDoctors />
-        </ClinicLayout>
-      } />
-      <Route path="/clinic/reports" element={
-        <ClinicLayout>
-          <ClinicReports />
-        </ClinicLayout>
-      } />
-      <Route path="/clinic/settings" element={
-        <ClinicLayout>
-          <ClinicSettings />
-        </ClinicLayout>
-      } />
-      <Route path="/clinic/*" element={<ClinicNotFound />} />
-      <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
-    </Routes>
-  )
-}
+  // Clinic Routes
+  if (role === 'clinic') {
+    return (
+      <Routes>
+        <Route path="/clinic/dashboard" element={<ClinicDashboard />} />
+        <Route path="/clinic/queues" element={<ClinicQueues />} />
+        <Route path="/clinic/doctors" element={<ClinicDoctors />} />
+        <Route path="/clinic/reports" element={<ClinicReports />} />
+        <Route path="/clinic/settings" element={<ClinicSettings />} />
+        <Route path="/clinic/*" element={<ClinicNotFound />} />
+        <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
+      </Routes>
+    )
+  }
   // Patient Routes
   if (role === 'patient') {
     return (

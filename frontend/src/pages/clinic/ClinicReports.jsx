@@ -1,9 +1,7 @@
 ﻿import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 const ClinicReports = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [selectedReport, setSelectedReport] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -12,24 +10,6 @@ const ClinicReports = () => {
     name: 'City Medical Center',
     email: 'admin@citymedical.com',
     phone: '+1 (555) 123-4567'
-  };
-
-  const tabs = [
-    { id: 'dashboard', path: '/clinic/dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'queues', path: '/clinic/queues', label: 'Queues', icon: '👥' },
-    { id: 'doctors', path: '/clinic/doctors', label: 'Doctors', icon: '👨‍⚕️' },
-    { id: 'reports', path: '/clinic/reports', label: 'Reports', icon: '📈' },
-    { id: 'activity', path: '/clinic/activity', label: 'Recent Activity', icon: '🔄' }
-  ];
-
-  const getActiveTab = () => {
-    const currentPath = location.pathname;
-    const activeTab = tabs.find(tab => currentPath.startsWith(tab.path));
-    return activeTab?.id || 'dashboard';
-  };
-
-  const handleTabClick = (tabPath) => {
-    navigate(tabPath);
   };
 
   // NEW: Interactive report data
@@ -135,7 +115,8 @@ const ClinicReports = () => {
   ];
 
   return (
-    <div className="dashboard">
+    <DashboardLayout>
+      <div className="dashboard">
       {/* Header Section */}
       <header className="header">
         <div className="header-content">
@@ -154,58 +135,7 @@ const ClinicReports = () => {
         </div>
       </header>
 
-      {/* Main Content Grid */}
-      <div className="main-content">
-        {/* Sidebar Navigation */}
-        <aside className="sidebar">
-          {/* Navigation Tabs */}
-          <nav className="nav-tabs">
-            <h3>NAVIGATION</h3>
-            <div className="tabs-container">
-              {tabs.map((tab) => {
-                const isActive = getActiveTab() === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabClick(tab.path)}
-                    className={`tab-button ${isActive ? 'active' : ''}`}
-                  >
-                    <span className="tab-icon">{tab.icon}</span>
-                    <span className="tab-label">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Report Metrics - Replaced Patient Visit Stats */}
-          <div className="stats-section">
-            <h3>Performance Overview</h3>
-            <div className="visit-stats">
-              <div className="overall-stat">
-                <div className="stat-value">87%</div>
-                <div className="stat-label">Overall Performance</div>
-              </div>
-              {performanceMetrics.map((metric, index) => (
-                <div key={metric.category} className="department-stat">
-                  <div className="stat-bar">
-                    <div 
-                      className="stat-progress" 
-                      style={{
-                        width: `${Math.min((metric.current / (metric.category === 'Revenue Growth' ? 50000 : 1500)) * 100, 100)}%`,
-                        backgroundColor: reportStats[index].color
-                      }}
-                    ></div>
-                  </div>
-                  <span className="stat-text">{metric.category} {metric.growth}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="content-area">
+      <div className="content-area">
           {/* Page Header */}
           <div className="page-header">
             <h2>Performance Analytics</h2>
@@ -350,14 +280,13 @@ const ClinicReports = () => {
               </div>
             </div>
           )}
-        </main>
       </div>
 
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+          font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .header {
@@ -429,43 +358,8 @@ const ClinicReports = () => {
         }
         
         /* NAVIGATION TABS STYLES */
-        .nav-tabs h3 {
-          color: #7f8c8d;
-          font-size: 12px;
-          text-transform: uppercase;
-          margin-bottom: 20px;
-          letter-spacing: 1px;
-        }
-        
-        .tabs-container {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        
-        .tab-button {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px 20px;
-          border: none;
-          border-radius: 12px;
-          background: #f8f9fa;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          width: 100%;
-          text-align: left;
-        }
-        
-        .tab-button:hover {
-          background: #e3f2fd;
-          transform: translateX(5px);
-        }
-        
-        .tab-button.active {
-          background: linear-gradient(45deg, #3498db, #2980b9);
-          color: white;
-          box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        .section-header h3 {
+          color: #111827;
         }
         
         .tab-icon {
@@ -573,20 +467,15 @@ const ClinicReports = () => {
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
         
-        .metric-card.primary {
-          background: linear-gradient(135deg, #a8e6cf, #88d3a0);
-        }
-        
-        .metric-card.success {
-          background: linear-gradient(135deg, #ffd3b6, #ffaaa5);
-        }
-        
-        .metric-card.warning {
-          background: linear-gradient(135deg, #ff8b94, #ff6b6b);
-        }
-        
-        .metric-card.info {
-          background: linear-gradient(135deg, #a0c4ff, #74b9ff);
+        .metric-card {
+          padding: 24px;
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+          border: 1px solid #e0e7ff;
+          box-shadow: 0 6px 18px rgba(79, 70, 229, 0.08);
         }
         
         .metric-icon {
@@ -767,12 +656,12 @@ const ClinicReports = () => {
         }
         
         .btn-primary {
-          background: linear-gradient(135deg, #3498db, #2980b9);
+          background: linear-gradient(135deg, #4338ca, #4f46e5);
           color: white;
         }
         
         .btn-secondary {
-          background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+          background: #1f2937;
           color: white;
         }
         
@@ -917,7 +806,8 @@ const ClinicReports = () => {
           border-top: 1px solid #e0e6ed;
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

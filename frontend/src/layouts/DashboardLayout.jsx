@@ -33,8 +33,8 @@ export default function DashboardLayout({ children }) {
       logoHref: '/clinic/dashboard',
       items: [
         { name: 'Dashboard', href: '/clinic/dashboard', icon: LayoutDashboard },
-        { name: 'My Queues', href: '/clinic/queues', icon: ListChecks },
-        { name: 'Patients', href: '/clinic/patients', icon: Users },
+        { name: 'Queues', href: '/clinic/queues', icon: ListChecks },
+        { name: 'Doctors', href: '/clinic/doctors', icon: Stethoscope },
         { name: 'Reports', href: '/clinic/reports', icon: BarChart },
         { name: 'Settings', href: '/clinic/settings', icon: Settings },
       ]

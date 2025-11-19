@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import DashboardLayout from '../../../layouts/DashboardLayout';
 
 const DoctorManagement = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [doctors, setDoctors] = useState([
     {
       id: 'DOC-001',
@@ -34,25 +32,6 @@ const DoctorManagement = () => {
     email: '',
     phone: ''
   });
-
-  // Navigation tabs
-  const tabs = [
-    { id: 'dashboard', path: '/clinic/dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'queues', path: '/clinic/queues', label: 'Queues', icon: '👥' },
-    { id: 'doctors', path: '/clinic/doctors', label: 'Doctors', icon: '👨‍⚕️' },
-    { id: 'reports', path: '/clinic/reports', label: 'Reports', icon: '📈' },
-    { id: 'activity', path: '/clinic/activity', label: 'Recent Activity', icon: '🔄' }
-  ];
-
-  const getActiveTab = () => {
-    const currentPath = location.pathname;
-    const activeTab = tabs.find(tab => currentPath.startsWith(tab.path));
-    return activeTab?.id || 'dashboard';
-  };
-
-  const handleTabClick = (tabPath) => {
-    navigate(tabPath);
-  };
 
   // Generate unique doctor ID
   const generateDoctorId = () => {
@@ -153,7 +132,8 @@ const DoctorManagement = () => {
   ];
 
   return (
-    <div className="dashboard">
+    <DashboardLayout>
+      <div className="dashboard">
       {/* Header Section */}
       <header className="header">
         <div className="header-content">
@@ -174,28 +154,7 @@ const DoctorManagement = () => {
 
       {/* Main Content Grid */}
       <div className="main-content">
-        {/* Sidebar Navigation */}
-        <aside className="sidebar">
-          <nav className="nav-tabs">
-            <h3>NAVIGATION</h3>
-            <div className="tabs-container">
-              {tabs.map((tab) => {
-                const isActive = getActiveTab() === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabClick(tab.path)}
-                    className={`tab-button ${isActive ? 'active' : ''}`}
-                  >
-                    <span className="tab-icon">{tab.icon}</span>
-                    <span className="tab-label">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Patient Visit Stats */}
+        <main className="content-area">
           <div className="stats-section">
             <h3>Patient Visit By Department</h3>
             <div className="visit-stats">
@@ -219,10 +178,6 @@ const DoctorManagement = () => {
               ))}
             </div>
           </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="content-area">
           {/* Page Header */}
           <div className="page-header">
             <h2>Medical Staff</h2>
@@ -497,8 +452,8 @@ const DoctorManagement = () => {
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+          font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .header {
@@ -527,7 +482,7 @@ const DoctorManagement = () => {
           display: flex;
           gap: 20px;
           font-size: 14px;
-          color: #7f8c8d;
+          color: #4b5563;
         }
         
         .user-profile {
@@ -540,7 +495,7 @@ const DoctorManagement = () => {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: linear-gradient(45deg, #3498db, #9b59b6);
+          background: linear-gradient(135deg, #4f46e5, #9333ea);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -549,73 +504,14 @@ const DoctorManagement = () => {
         }
         
         .user-status {
-          color: #27ae60;
+          color: #10b981;
           font-weight: 500;
         }
         
         .main-content {
-          display: grid;
-          grid-template-columns: 280px 1fr;
-          gap: 0;
           max-width: 1400px;
           margin: 0 auto;
           padding: 30px;
-        }
-        
-        .sidebar {
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 20px 0 0 20px;
-          padding: 30px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* NAVIGATION TABS STYLES */
-        .nav-tabs h3 {
-          color: #7f8c8d;
-          font-size: 12px;
-          text-transform: uppercase;
-          margin-bottom: 20px;
-          letter-spacing: 1px;
-        }
-        
-        .tabs-container {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        
-        .tab-button {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px 20px;
-          border: none;
-          border-radius: 12px;
-          background: #f8f9fa;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          width: 100%;
-          text-align: left;
-        }
-        
-        .tab-button:hover {
-          background: #e3f2fd;
-          transform: translateX(5px);
-        }
-        
-        .tab-button.active {
-          background: linear-gradient(45deg, #3498db, #2980b9);
-          color: white;
-          box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-        }
-        
-        .tab-icon {
-          font-size: 20px;
-        }
-        
-        .tab-label {
-          font-weight: 600;
-          font-size: 14px;
         }
         
         .stats-section {
@@ -623,7 +519,7 @@ const DoctorManagement = () => {
         }
         
         .stats-section h3 {
-          color: #2c3e50;
+          color: #111827;
           margin-bottom: 20px;
           font-size: 16px;
         }
@@ -646,7 +542,7 @@ const DoctorManagement = () => {
         .overall-stat .stat-value {
           font-size: 32px;
           font-weight: 700;
-          color: #3498db;
+          color: #4f46e5;
         }
         
         .department-stat {
@@ -687,14 +583,14 @@ const DoctorManagement = () => {
         }
         
         .page-header h2 {
-          color: #2c3e50;
+          color: #111827;
           font-size: 32px;
           font-weight: 700;
           margin-bottom: 8px;
         }
         
         .page-subtitle {
-          color: #7f8c8d;
+          color: #4b5563;
           font-size: 16px;
         }
         
@@ -706,28 +602,14 @@ const DoctorManagement = () => {
         }
         
         .metric-card {
-          padding: 25px;
+          padding: 24px;
           border-radius: 16px;
           display: flex;
           align-items: center;
           gap: 15px;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .metric-card.primary {
-          background: linear-gradient(135deg, #a8e6cf, #88d3a0);
-        }
-        
-        .metric-card.success {
-          background: linear-gradient(135deg, #ffd3b6, #ffaaa5);
-        }
-        
-        .metric-card.warning {
-          background: linear-gradient(135deg, #ff8b94, #ff6b6b);
-        }
-        
-        .metric-card.info {
-          background: linear-gradient(135deg, #a0c4ff, #74b9ff);
+          box-shadow: 0 6px 18px rgba(79, 70, 229, 0.08);
+          background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+          border: 1px solid #e0e7ff;
         }
         
         .metric-icon {
@@ -738,10 +620,12 @@ const DoctorManagement = () => {
           font-size: 32px;
           font-weight: 700;
           margin-bottom: 5px;
+          color: #111827;
         }
         
         .metric-label {
           font-size: 14px;
+          color: #4b5563;
         }
         
         /* FIXED TEXT COLOR */
@@ -783,8 +667,8 @@ const DoctorManagement = () => {
         
         .form-input:focus {
           outline: none;
-          border-color: #3498db;
-          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+          border-color: #4f46e5;
+          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
         }
         
         .form-info {
@@ -859,7 +743,7 @@ const DoctorManagement = () => {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3498db, #9b59b6);
+          background: linear-gradient(135deg, #4f46e5, #9333ea);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -874,14 +758,14 @@ const DoctorManagement = () => {
         }
         
         .profile-info h4 {
-          color: #2c3e50;
+          color: #111827;
           font-size: 20px;
           font-weight: 700;
           margin: 0 0 5px 0;
         }
         
         .specialty {
-          color: #3498db;
+          color: #4f46e5;
           font-size: 16px;
           font-weight: 600;
           margin: 0 0 15px 0;
@@ -901,13 +785,13 @@ const DoctorManagement = () => {
         }
         
         .detail-label {
-          color: #7f8c8d;
+          color: #6b7280;
           font-size: 14px;
           font-weight: 500;
         }
         
         .detail-value {
-          color: #2c3e50;
+          color: #111827;
           font-size: 14px;
           font-weight: 600;
         }
@@ -970,7 +854,7 @@ const DoctorManagement = () => {
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3498db, #9b59b6);
+          background: linear-gradient(135deg, #4f46e5, #9333ea);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -984,14 +868,14 @@ const DoctorManagement = () => {
         }
         
         .doctor-name {
-          color: #2c3e50;
+          color: #111827;
           font-size: 18px;
           font-weight: 700;
           margin: 0 0 4px 0;
         }
         
         .doctor-specialty {
-          color: #3498db;
+          color: #4f46e5;
           font-size: 14px;
           font-weight: 600;
           margin: 0 0 2px 0;
@@ -1075,18 +959,18 @@ const DoctorManagement = () => {
         }
         
         .btn-action.edit {
-          background: #e3f2fd;
-          color: #1976d2;
+          background: #eef2ff;
+          color: #4f46e5;
         }
         
         .btn-action.remove {
-          background: #ffebee;
-          color: #d32f2f;
+          background: #fee2e2;
+          color: #b91c1c;
         }
         
         .btn-action.view {
-          background: #f3e5f5;
-          color: #7b1fa2;
+          background: #ede9fe;
+          color: #7c3aed;
         }
         
         .btn-action:hover {
@@ -1116,12 +1000,12 @@ const DoctorManagement = () => {
         }
         
         .btn-primary {
-          background: linear-gradient(135deg, #3498db, #2980b9);
+          background: linear-gradient(135deg, #4338ca, #4f46e5);
           color: white;
         }
         
         .btn-secondary {
-          background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+          background: #1f2937;
           color: white;
         }
         
@@ -1130,7 +1014,8 @@ const DoctorManagement = () => {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

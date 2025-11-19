@@ -1,33 +1,14 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import SimpleTable from '../../components/admin/dashboard/SimpleTable';
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 const Queues = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const clinicData = {
     id: 'CLIN-789123',
     name: 'City Medical Center',
     email: 'admin@citymedical.com',
     phone: '+1 (555) 123-4567'
-  };
-
-  const tabs = [
-    { id: 'dashboard', path: '/clinic/dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'queues', path: '/clinic/queues', label: 'Queues', icon: '👥' },
-    { id: 'doctors', path: '/clinic/doctors', label: 'Doctors', icon: '👨‍⚕️' },
-    { id: 'reports', path: '/clinic/reports', label: 'Reports', icon: '📈' },
-    { id: 'activity', path: '/clinic/activity', label: 'Recent Activity', icon: '🔄' }
-  ];
-
-  const getActiveTab = () => {
-    const currentPath = location.pathname;
-    const activeTab = tabs.find(tab => currentPath.startsWith(tab.path));
-    return activeTab?.id || 'dashboard';
-  };
-
-  const handleTabClick = (tabPath) => {
-    navigate(tabPath);
   };
 
   const [queueData, setQueueData] = useState({
@@ -84,6 +65,45 @@ const Queues = () => {
   ];
 
   const conditions = ['Asthma', 'Hypertension', 'Diabetes', 'Arthritis', 'Migraine', 'Allergies'];
+
+  const queueTableColumns = useMemo(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Patient Name',
+        cell: ({ getValue }) => (
+          <span className="font-medium text-gray-900">{getValue()}</span>
+        ),
+      },
+      {
+        accessorKey: 'visitTime',
+        header: 'Wait Time',
+        cell: ({ getValue }) => (
+          <span className="text-gray-600">{getValue()}</span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue();
+          const isWaiting = status === 'waiting';
+          return (
+            <span
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                isWaiting
+                  ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                  : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+              }`}
+            >
+              {isWaiting ? 'Waiting' : 'In Progress'}
+            </span>
+          );
+        },
+      },
+    ],
+    []
+  );
 
   const callNextPatient = () => {
     if (queueData.isQueuePaused) {
@@ -170,7 +190,8 @@ const Queues = () => {
   };
 
   return (
-    <div className="dashboard">
+    <DashboardLayout>
+      <div className="dashboard">
       {/* Notification Popup */}
       {notification.show && (
         <div className={`notification ${notification.type}`}>
@@ -204,58 +225,7 @@ const Queues = () => {
         </div>
       </header>
 
-      {/* Main Content Grid */}
-      <div className="main-content">
-        {/* Sidebar Navigation */}
-        <aside className="sidebar">
-          {/* Navigation Tabs */}
-          <nav className="nav-tabs">
-            <h3>NAVIGATION</h3>
-            <div className="tabs-container">
-              {tabs.map((tab) => {
-                const isActive = getActiveTab() === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabClick(tab.path)}
-                    className={`tab-button ${isActive ? 'active' : ''}`}
-                  >
-                    <span className="tab-icon">{tab.icon}</span>
-                    <span className="tab-label">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Queue Metrics */}
-          <div className="stats-section">
-            <h3>Queue Overview</h3>
-            <div className="visit-stats">
-              <div className="overall-stat">
-                <div className="stat-value">85%</div>
-                <div className="stat-label">Efficiency</div>
-              </div>
-              {queueStats.map((stat, index) => (
-                <div key={stat.name} className="department-stat">
-                  <div className="stat-bar">
-                    <div 
-                      className="stat-progress" 
-                      style={{
-                        width: `${Math.min((stat.value / (stat.name === 'Active Patients' ? 20 : stat.name === 'Avg Wait Time' ? 30 : 8)) * 100, 100)}%`,
-                        backgroundColor: stat.color
-                      }}
-                    ></div>
-                  </div>
-                  <span className="stat-text">{stat.name} {stat.change}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="content-area">
+      <div className="content-area">
           {/* Queue Metrics Cards */}
           <div className="metrics-grid">
             {queueStats.map((stat, index) => (
@@ -289,29 +259,12 @@ const Queues = () => {
 
               {/* Current Queue Table */}
               <div className="table-card">
-                <h3 className="table-title">Current Queue</h3>
-                <table className="visits-table">
-                  <thead>
-                    <tr>
-                      <th>Patient Name</th>
-                      <th>Wait Time</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentQueue.map((visit) => (
-                      <tr key={visit.id}>
-                        <td className="patient-name">{visit.name}</td>
-                        <td className="visit-time">{visit.visitTime}</td>
-                        <td>
-                          <span className={`status-badge ${visit.status}`}>
-                            {visit.status === 'waiting' ? 'Waiting' : 'In Progress'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <h3 className="table-title mb-4">Current Queue</h3>
+                <SimpleTable
+                  data={currentQueue}
+                  columns={queueTableColumns}
+                  title={null}
+                />
               </div>
             </div>
 
@@ -399,14 +352,14 @@ const Queues = () => {
               </div>
             </div>
           </div>
-        </main>
       </div>
+
 
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+          font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           position: relative;
         }
         
@@ -677,25 +630,14 @@ const Queues = () => {
         }
         
         .metric-card {
-          padding: 25px;
+          padding: 24px;
           border-radius: 16px;
           display: flex;
           align-items: center;
           gap: 15px;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-          border: 1px solid #e0e6ed;
-        }
-        
-        .metric-card.primary {
-          background: linear-gradient(135deg, #a8e6cf, #88d3a0);
-        }
-        
-        .metric-card.success {
-          background: linear-gradient(135deg, #ffd3b6, #ffaaa5);
-        }
-        
-        .metric-card.info {
-          background: linear-gradient(135deg, #a0c4ff, #74b9ff);
+          border: 1px solid #e0e7ff;
+          background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+          box-shadow: 0 6px 18px rgba(79, 70, 229, 0.08);
         }
         
         .metric-icon {
@@ -706,11 +648,13 @@ const Queues = () => {
           font-size: 32px;
           font-weight: 700;
           margin-bottom: 5px;
+          color: #111827;
         }
         
         .metric-label {
           font-size: 14px;
           font-weight: 600;
+          color: #4b5563;
         }
         
         .metric-change {
@@ -869,27 +813,27 @@ const Queues = () => {
         }
         
         .btn-primary {
-          background: linear-gradient(135deg, #3498db, #2980b9);
+          background: linear-gradient(135deg, #4338ca, #4f46e5);
           color: white;
-          border-color: #2980b9;
+          border-color: #4338ca;
         }
         
         .btn-secondary {
-          background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+          background: #1f2937;
           color: white;
-          border-color: #7f8c8d;
+          border-color: #111827;
         }
         
         .btn-warning {
-          background: linear-gradient(135deg, #f39c12, #e67e22);
+          background: linear-gradient(135deg, #f59e0b, #d97706);
           color: white;
-          border-color: #e67e22;
+          border-color: #d97706;
         }
         
         .btn-success {
-          background: linear-gradient(135deg, #27ae60, #2ecc71);
+          background: linear-gradient(135deg, #059669, #10b981);
           color: white;
-          border-color: #2ecc71;
+          border-color: #059669;
         }
         
         .btn:hover:not(:disabled) {
@@ -919,13 +863,13 @@ const Queues = () => {
         }
         
         .condition-tag {
-          background: #e3f2fd;
-          color: #1976d2;
+          background: #eef2ff;
+          color: #4338ca;
           padding: 6px 12px;
           border-radius: 16px;
           font-size: 12px;
           font-weight: 500;
-          border: 1px solid #bbdefb;
+          border: 1px solid #c7d2fe;
         }
         
         .quick-stats {
@@ -967,7 +911,8 @@ const Queues = () => {
           font-weight: 600;
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

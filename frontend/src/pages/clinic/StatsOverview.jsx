@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  ListChecks,
+  CheckCircle2,
+  Users,
+  Clock3,
+  Stethoscope
+} from 'lucide-react';
+import KPICard from '../../components/admin/dashboard/KPICard';
 
 const StatsOverview = ({ clinicData }) => {
   const navigate = useNavigate();
@@ -13,8 +21,7 @@ const StatsOverview = ({ clinicData }) => {
       change: '+1', 
       trend: 'up',
       description: 'Doctors with active patients',
-      icon: '📋',
-      color: 'blue'
+      icon: ListChecks
     },
     { 
       title: 'Tickets Served', 
@@ -22,8 +29,7 @@ const StatsOverview = ({ clinicData }) => {
       change: '+8', 
       trend: 'up',
       description: 'Today',
-      icon: '✅',
-      color: 'green'
+      icon: CheckCircle2
     },
     { 
       title: 'Patients Waiting', 
@@ -31,8 +37,7 @@ const StatsOverview = ({ clinicData }) => {
       change: '-3', 
       trend: 'down',
       description: 'Across all queues',
-      icon: '⏳',
-      color: 'yellow'
+      icon: Users
     },
     { 
       title: 'Avg Wait Time', 
@@ -40,8 +45,7 @@ const StatsOverview = ({ clinicData }) => {
       change: '-5m', 
       trend: 'down',
       description: 'Improving',
-      icon: '⏰',
-      color: 'purple'
+      icon: Clock3
     },
     { 
       title: 'Doctors Online', 
@@ -49,18 +53,9 @@ const StatsOverview = ({ clinicData }) => {
       change: '+2', 
       trend: 'up',
       description: 'Currently active',
-      icon: '👨‍⚕️',
-      color: 'indigo'
+      icon: Stethoscope
     },
   ];
-
-  const colorClasses = {
-    blue: 'bg-blue-50 border-blue-200',
-    green: 'bg-green-50 border-green-200', 
-    yellow: 'bg-yellow-50 border-yellow-200',
-    purple: 'bg-purple-50 border-purple-200',
-    indigo: 'bg-indigo-50 border-indigo-200'
-  };
 
   // Report types with sample data
   const reportTypes = [
@@ -133,25 +128,17 @@ const StatsOverview = ({ clinicData }) => {
 
   return (
     <div>
-      {/* Stats Grid */}
+      {/* Stats Grid - using shared admin KPICard styling */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        {stats.map((stat, index) => (
-          <div key={index} className={`p-4 rounded-xl border-2 ${colorClasses[stat.color]} transition-all hover:shadow-md`}>
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                <div className={`inline-flex items-center mt-1 text-xs font-medium ${
-                  stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  <span className="mr-1">{stat.trend === 'up' ? '↗' : '↘'}</span>
-                  <span>{stat.change}</span>
-                </div>
-              </div>
-              <span className="text-2xl">{stat.icon}</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">{stat.description}</p>
-          </div>
+        {stats.map((stat) => (
+          <KPICard
+            key={stat.title}
+            title={stat.title}
+            value={stat.value}
+            change={stat.change}
+            changeType={stat.trend === 'up' ? 'increase' : 'decrease'}
+            icon={stat.icon}
+          />
         ))}
       </div>
 
