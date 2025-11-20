@@ -41,13 +41,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        console.log('🎯 Dashboard: Starting to load dashboard data...');
         setLoading(true);
         
         // Fetch real stats from API
-        console.log('🎯 Dashboard: Calling getDashboardStats()...');
         const statsData = await getDashboardStats();
-        console.log('🎯 Dashboard: Received statsData:', statsData);
         
         const processedStats = {
           totalClinics: statsData.totalClinics || 0,
@@ -57,23 +54,14 @@ export default function AdminDashboard() {
           totalUsers: (statsData.totalDoctors || 0) + (statsData.totalPatients || 0),
           systemActivity: statsData.totalTickets || 0
         };
-        console.log('🎯 Dashboard: Setting stats to:', processedStats);
         setStats(processedStats);
 
         // Fetch real clinic performance data
         try {
-          console.log('🎯 Dashboard: Calling getClinicPerformance()...');
           const clinicPerf = await getClinicPerformance();
-          console.log('🎯 Dashboard: Received clinicPerf:', clinicPerf);
           setClinicPerformance(clinicPerf);
         } catch (error) {
-          console.error('❌ Dashboard: Error loading clinic performance:', error);
-          console.error('Error details:', {
-            message: error.message,
-            response: error.response,
-            request: error.request,
-            stack: error.stack
-          });
+          console.error('Error loading clinic performance:', error);
           // Fallback to dummy data if API fails
           setClinicPerformance(generateClinicPerformanceData());
         }
@@ -83,16 +71,8 @@ export default function AdminDashboard() {
         setUserDistributionData(generateUserDistributionData());
         setSystemActivityData(generateSystemActivityTimeSeries(30));
         
-        console.log('✅ Dashboard: Successfully loaded all dashboard data');
       } catch (error) {
-        console.error('❌ Dashboard: Error loading dashboard data:', error);
-        console.error('Error details:', {
-          message: error.message,
-          response: error.response,
-          request: error.request,
-          stack: error.stack,
-          config: error.config
-        });
+        console.error('Error loading dashboard data:', error);
         toast.error('Failed to load some dashboard data. Showing cached information.');
         
         // Fallback to dummy data
@@ -110,7 +90,6 @@ export default function AdminDashboard() {
         setClinicPerformance(generateClinicPerformanceData());
       } finally {
         setLoading(false);
-        console.log('🎯 Dashboard: Finished loading dashboard data');
       }
     };
 
