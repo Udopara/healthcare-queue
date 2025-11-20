@@ -4,6 +4,7 @@ import crypto from "crypto";
 
 const ALLOWED_ROLES = ["admin", "clinic", "doctor", "patient"];
 
+// Helper to format user data for responses, handles different ID field names
 const buildUserPayload = (user) => ({
   id: user.user_id ?? user.id,
   name: user.name,
@@ -13,6 +14,7 @@ const buildUserPayload = (user) => ({
   linked_entity_id: user.linked_entity_id,
 });
 
+// Handles user registration - doctors need a clinicId, others don't
 export const register = async (req, res) => {
   const { name, email, phone_number, password, role, clinicId } = req.body;
 
@@ -91,6 +93,7 @@ export const register = async (req, res) => {
   }
 };
 
+// Authenticates user and returns a JWT token if credentials are valid
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -127,6 +130,8 @@ export const login = async (req, res) => {
   }
 };
 
+// Generates a password reset token and emails it to the user
+// Returns success even if email doesn't exist (for privacy)
 export const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
@@ -178,6 +183,7 @@ export const requestPasswordReset = async (req, res) => {
   }
 };
 
+// Validates the reset token and updates the user's password
 export const resetPassword = async (req, res) => {
   const { token, password } = req.body;
 
@@ -217,6 +223,7 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+// Returns the currently authenticated user's info
 export const getCurrentUser = async (req, res) => {
   if (!req.user?.id) {
     return res.status(401).json({ message: "Unauthorized" });

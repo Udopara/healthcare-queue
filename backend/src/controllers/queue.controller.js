@@ -1,5 +1,6 @@
 import { Queue, Ticket } from "../models/index.js";
 
+// Gets all queues, optionally filtered by clinic_id if provided
 export const getAllQueues = async (req, res) => {
   const { clinic_id } = req.query;
   try {
@@ -27,6 +28,7 @@ export const getAllQueues = async (req, res) => {
   }
 };
 
+// Fetches a single queue by its ID
 export const getQueueById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -43,6 +45,7 @@ export const getQueueById = async (req, res) => {
   }
 };
 
+// Creates a new queue for a clinic
 export const createQueue = async (req, res) => {
   try {
     const { queue_name, clinic_id, max_number } = req.body;
@@ -66,6 +69,7 @@ export const createQueue = async (req, res) => {
   }
 };
 
+// Deletes a queue from the system
 export const deleteQueue = async (req, res) => {
   try {
     const { id } = req.params;
@@ -83,6 +87,7 @@ export const deleteQueue = async (req, res) => {
   }
 };
 
+// Updates queue properties like name, clinic, max capacity, or status
 export const updateQueue = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,6 +111,7 @@ export const updateQueue = async (req, res) => {
   }
 };
 
+// Returns all tickets for a specific queue - only doctors, clinics, and admins can access
 export const getQueueTickets = async (req, res) => {
   const {role} = req.user;
   if (!["doctor", "clinic", "admin"].includes(role)) {
@@ -124,6 +130,7 @@ export const getQueueTickets = async (req, res) => {
   }
 }
 
+// Calls the next person in the queue (moves to serving status)
 export const callNextInQueue = async (req, res) => {
   try {
     const queue_id = req.params.id;

@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 
 dotenv.config();
 
+// Middleware to verify JWT token from Authorization header
+// Attaches user info to req.user if token is valid
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
