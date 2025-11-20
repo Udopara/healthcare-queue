@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import cors from "cors";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
@@ -15,6 +16,15 @@ import smsRoutes from "./src/routes/sms.routes.js";
 
 dotenv.config();
 const app = express();
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 (async () => {
@@ -71,12 +81,22 @@ app.use(cors({
 
 app.use("/api/patients", patientRoutes);
 app.use("/api/clinics", clinicRoutes);
-app.use("/api/queues", queueRoutes)
+app.use("/api/queues", queueRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/sms", smsRoutes);
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("❌ Global Error Handler:", err);
+  console.error("Error stack:", err.stack);
+  res.status(err.status || 500).json({
+    message: err.message || "Internal server error",
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(3000, () =>

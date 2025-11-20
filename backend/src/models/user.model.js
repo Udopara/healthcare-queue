@@ -58,6 +58,7 @@ export default (sequelize) => {
       tableName: "User",
       timestamps: false,
       hooks: {
+        // Creates the linked entity (clinic/patient/doctor) based on user role before creating user
         beforeCreate: async (user, options) => {
           const { Clinic, Patient, Doctor } = sequelize.models;
           const clinicContextId = options?.context?.clinicId ?? null;
@@ -102,6 +103,7 @@ export default (sequelize) => {
     }
   );
 
+  // Compares a plain password with the hashed password stored in the database
   User.prototype.checkPassword = function (password) {
     return bcrypt.compare(password, this.password_hash);
   };

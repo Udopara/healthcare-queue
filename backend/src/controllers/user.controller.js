@@ -2,6 +2,7 @@ import { User } from "../models/index.js";
 
 const ALLOWED_ROLES = ["admin", "clinic", "doctor", "patient"];
 
+// Formats user data for API responses
 const toUserResponse = (userInstance) => ({
   id: userInstance.user_id ?? userInstance.id,
   name: userInstance.name,
@@ -12,6 +13,7 @@ const toUserResponse = (userInstance) => ({
   created_at: userInstance.created_at,
 });
 
+// Returns all users in the system
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
@@ -22,6 +24,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+// Gets a single user by their ID
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -38,6 +41,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
+// Updates user details - validates role if provided
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -70,6 +74,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
+// Deletes a user from the system
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;

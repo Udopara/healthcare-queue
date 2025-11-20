@@ -45,14 +45,16 @@ export default function AdminDashboard() {
         
         // Fetch real stats from API
         const statsData = await getDashboardStats();
-        setStats({
+        
+        const processedStats = {
           totalClinics: statsData.totalClinics || 0,
           totalDoctors: statsData.totalDoctors || 0,
           totalPatients: statsData.totalPatients || 0,
           totalQueues: statsData.totalQueues || 0,
           totalUsers: (statsData.totalDoctors || 0) + (statsData.totalPatients || 0),
           systemActivity: statsData.totalTickets || 0
-        });
+        };
+        setStats(processedStats);
 
         // Fetch real clinic performance data
         try {

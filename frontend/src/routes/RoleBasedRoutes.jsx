@@ -3,11 +3,11 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 // Clinic Pages
-import ClinicDashboard from '../pages/clinic/Dashboard'
+import ClinicDashboard from "../pages/clinic/ClinicDashboard";
 import ClinicQueues from '../pages/clinic/Queues'
-import ClinicPatients from '../pages/clinic/Patients'
-import ClinicReports from '../pages/clinic/Reports'
-import ClinicSettings from '../pages/clinic/Settings'
+import ClinicDoctors from '../pages/clinic/ClinicDoctors'
+import ClinicReports from '../pages/clinic/ClinicReports'
+import ClinicSettings from '../pages/clinic/RecentActivity'
 import ClinicNotFound from '../pages/clinic/NotFound'
 
 // Patient Pages
@@ -62,7 +62,7 @@ export default function RoleBasedRoutes() {
       <Routes>
         <Route path="/clinic/dashboard" element={<ClinicDashboard />} />
         <Route path="/clinic/queues" element={<ClinicQueues />} />
-        <Route path="/clinic/patients" element={<ClinicPatients />} />
+        <Route path="/clinic/doctors" element={<ClinicDoctors />} />
         <Route path="/clinic/reports" element={<ClinicReports />} />
         <Route path="/clinic/settings" element={<ClinicSettings />} />
         <Route path="/clinic/*" element={<ClinicNotFound />} />
@@ -70,7 +70,6 @@ export default function RoleBasedRoutes() {
       </Routes>
     )
   }
-
   // Patient Routes
   if (role === 'patient') {
     return (

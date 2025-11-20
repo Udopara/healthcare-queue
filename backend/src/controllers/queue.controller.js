@@ -1,21 +1,34 @@
 import { Queue, Ticket } from "../models/index.js";
 
+// Gets all queues, optionally filtered by clinic_id if provided
 export const getAllQueues = async (req, res) => {
   const { clinic_id } = req.query;
   try {
+    console.log("🔍 getAllQueues: Starting fetch, clinic_id:", clinic_id);
+    let queues;
     if (clinic_id) {
-      const queues = await Queue.findAll({ where: { clinic_id } });
-      return res.json(queues);
+      queues = await Queue.findAll({ where: { clinic_id } });
     } else {
-      const queues = await Queue.findAll();
-      return res.json(queues);
+      queues = await Queue.findAll();
     }
+    console.log("✅ getAllQueues: Successfully fetched", queues?.length || 0, "queues");
+    return res.json(queues);
   } catch (error) {
-    console.error("Error fetching queues:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("❌ Error fetching queues:", error);
+    console.error("Error details:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      original: error.original
+    });
+    return res.status(500).json({ 
+      message: "Internal server error",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
+// Fetches a single queue by its ID
 export const getQueueById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -32,6 +45,7 @@ export const getQueueById = async (req, res) => {
   }
 };
 
+// Creates a new queue for a clinic
 export const createQueue = async (req, res) => {
   try {
     const { queue_name, clinic_id, max_number } = req.body;
@@ -55,6 +69,7 @@ export const createQueue = async (req, res) => {
   }
 };
 
+// Deletes a queue from the system
 export const deleteQueue = async (req, res) => {
   try {
     const { id } = req.params;
@@ -72,6 +87,7 @@ export const deleteQueue = async (req, res) => {
   }
 };
 
+// Updates queue properties like name, clinic, max capacity, or status
 export const updateQueue = async (req, res) => {
   try {
     const { id } = req.params;
@@ -95,6 +111,7 @@ export const updateQueue = async (req, res) => {
   }
 };
 
+// Returns all tickets for a specific queue - only doctors, clinics, and admins can access
 export const getQueueTickets = async (req, res) => {
   const {role} = req.user;
   if (!["doctor", "clinic", "admin"].includes(role)) {
@@ -113,6 +130,7 @@ export const getQueueTickets = async (req, res) => {
   }
 }
 
+// Calls the next person in the queue (moves to serving status)
 export const callNextInQueue = async (req, res) => {
   try {
     const queue_id = req.params.id;
