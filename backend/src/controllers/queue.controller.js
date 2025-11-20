@@ -4,16 +4,27 @@ import { Queue, Ticket } from "../models/index.js";
 export const getAllQueues = async (req, res) => {
   const { clinic_id } = req.query;
   try {
+    console.log("🔍 getAllQueues: Starting fetch, clinic_id:", clinic_id);
+    let queues;
     if (clinic_id) {
-      const queues = await Queue.findAll({ where: { clinic_id } });
-      return res.json(queues);
+      queues = await Queue.findAll({ where: { clinic_id } });
     } else {
-      const queues = await Queue.findAll();
-      return res.json(queues);
+      queues = await Queue.findAll();
     }
+    console.log("✅ getAllQueues: Successfully fetched", queues?.length || 0, "queues");
+    return res.json(queues);
   } catch (error) {
-    console.error("Error fetching queues:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("❌ Error fetching queues:", error);
+    console.error("Error details:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      original: error.original
+    });
+    return res.status(500).json({ 
+      message: "Internal server error",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
