@@ -3,31 +3,63 @@ import api from './api';
 // Admin dashboard statistics
 export const getDashboardStats = async () => {
   try {
+    console.log('📊 getDashboardStats: Starting to fetch dashboard stats...');
+    
     // Fetch all data in parallel
     const [clinics, patients, users, queues, tickets] = await Promise.all([
-      // api.get('/clinics'),
-      // api.get('/patients'),
-      api.get('/users'),
-      // api.get('/queues'),
-      // api.get('/tickets')
+      api.get('/clinics').catch(err => {
+        console.warn('⚠️ Failed to fetch clinics:', err);
+        return { data: [] };
+      }),
+      api.get('/patients').catch(err => {
+        console.warn('⚠️ Failed to fetch patients:', err);
+        return { data: [] };
+      }),
+      api.get('/users').catch(err => {
+        console.warn('⚠️ Failed to fetch users:', err);
+        return { data: [] };
+      }),
+      api.get('/queues').catch(err => {
+        console.warn('⚠️ Failed to fetch queues:', err);
+        return { data: [] };
+      }),
+      api.get('/tickets').catch(err => {
+        console.warn('⚠️ Failed to fetch tickets:', err);
+        return { data: [] };
+      })
     ]);
 
+    console.log('📊 getDashboardStats: Received responses:', {
+      clinics: clinics?.data,
+      patients: patients?.data,
+      users: users?.data,
+      queues: queues?.data,
+      tickets: tickets?.data
+    });
+
     const stats = {
-      totalClinics: clinics.data.length,
-      totalDoctors: users.data.filter(u => u.role === 'doctor').length,
-      totalPatients: patients.data.length,
-      totalQueues: queues.data.length,
-      totalTickets: tickets.data.length,
-      activeTickets: tickets.data.filter(t => t.status === 'waiting' || t.status === 'serving').length,
-      completedTickets: tickets.data.filter(t => t.status === 'completed').length,
-      waitingTickets: tickets.data.filter(t => t.status === 'waiting').length,
-      servingTickets: tickets.data.filter(t => t.status === 'serving').length,
-      cancelledTickets: tickets.data.filter(t => t.status === 'cancelled').length,
+      totalClinics: clinics?.data?.length || 0,
+      totalDoctors: users?.data?.filter(u => u.role === 'doctor').length || 0,
+      totalPatients: patients?.data?.length || 0,
+      totalQueues: queues?.data?.length || 0,
+      totalTickets: tickets?.data?.length || 0,
+      activeTickets: tickets?.data?.filter(t => t.status === 'waiting' || t.status === 'serving').length || 0,
+      completedTickets: tickets?.data?.filter(t => t.status === 'completed').length || 0,
+      waitingTickets: tickets?.data?.filter(t => t.status === 'waiting').length || 0,
+      servingTickets: tickets?.data?.filter(t => t.status === 'serving').length || 0,
+      cancelledTickets: tickets?.data?.filter(t => t.status === 'cancelled').length || 0,
     };
 
+    console.log('📊 getDashboardStats: Calculated stats:', stats);
     return stats;
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
+    console.error('❌ Error fetching dashboard stats:', error);
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response,
+      request: error.request,
+      stack: error.stack
+    });
     throw error;
   }
 };

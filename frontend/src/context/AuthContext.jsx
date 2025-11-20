@@ -12,13 +12,17 @@ export const AuthProvider = ({ children }) => {
   // This useEffect runs once on mount (which happens on every page reload)
   useEffect(() => {
     const initAuth = async () => {
+      console.log('🔐 AuthContext: Initializing auth...')
       const token = getToken()
+      console.log('🔐 AuthContext: Token found:', !!token)
       
       // Always verify token with server on reload if token exists
       if (token) {
         try {
+          console.log('🔐 AuthContext: Calling verifyUser()...')
           // Call /api/auth/me to verify token and get fresh user data
           const response = await authService.verifyUser()
+          console.log('🔐 AuthContext: verifyUser response:', response)
           
           if (response.user) {
             // Store fresh user data from server
@@ -30,23 +34,36 @@ export const AuthProvider = ({ children }) => {
               role: response.user.role,
               linked_entity_id: response.user.linked_entity_id
             }
+            console.log('🔐 AuthContext: Setting user data:', userData)
             
             // Update localStorage with fresh data from server
             setAuth(token, userData)
             setUser(userData)
+            console.log('✅ AuthContext: User authenticated successfully')
+          } else {
+            console.warn('⚠️ AuthContext: Response has no user data')
           }
         } catch (error) {
           // Token is invalid or expired, clear auth
-          console.log('Token verification failed on reload:', error.message)
+          console.error('❌ AuthContext: Token verification failed on reload:', error.message)
+          console.error('Error details:', {
+            message: error.message,
+            response: error.response,
+            request: error.request,
+            stack: error.stack,
+            config: error.config
+          })
           clearAuth()
           setUser(null)
         }
       } else {
         // No token found, ensure user is null
+        console.log('🔐 AuthContext: No token found, user set to null')
         setUser(null)
       }
       
       setLoading(false)
+      console.log('🔐 AuthContext: Auth initialization complete')
     }
 
     // Always call on mount (every page reload)
