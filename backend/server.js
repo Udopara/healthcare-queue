@@ -61,6 +61,14 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+import cors from "cors";
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+
+
 app.use("/api/patients", patientRoutes);
 app.use("/api/clinics", clinicRoutes);
 app.use("/api/queues", queueRoutes)
