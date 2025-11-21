@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
