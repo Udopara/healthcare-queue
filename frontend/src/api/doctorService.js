@@ -10,8 +10,8 @@ export const fetchQueues = async () => {
   return res.data;
 };
 
-export const createQueue = async (queueName) => {
-  const res = await api.post("/queues", { queue_name: queueName });
+export const createQueue = async ({ queue_name, max_number, clinic_id, status }) => {
+  const res = await api.post("/queues", { queue_name, max_number, clinic_id, status });
   return res.data;
 };
 
@@ -35,8 +35,8 @@ export const callNextPatient = async (id) => {
   return res.data;
 };
 
-export const fetchTickets = async () => {
-  const res = await api.get("/tickets");
+export const fetchTickets = async (queue_id) => {
+  const res = await api.get(`/queues/${queue_id}/tickets`);
   return res.data;
 };
 

@@ -5,12 +5,7 @@ import ProfessionalLineChart from "../../components/admin/dashboard/Professional
 import ChartBarChart from "../../components/admin/dashboard/ChartBarChart";
 import SimpleDonutChart from "../../components/admin/dashboard/SimpleDonutChart";
 import SimpleTable from "../../components/admin/dashboard/SimpleTable";
-import {
-  Users,
-  ListChecks,
-  Activity,
-  Calendar,
-} from "lucide-react";
+import { Users, ListChecks, Activity, Calendar } from "lucide-react";
 import { fetchPatients, fetchQueues, fetchTickets } from "../../api/doctorService";
 
 const PRIMARY_COLOR = "#6366f1";
@@ -31,11 +26,12 @@ export default function DoctorDashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [patientsData, queuesData, ticketsData] = await Promise.all([
-          fetchPatients(),
-          fetchQueues(),
-          fetchTickets(),
-        ]);
+        const patientsData = await fetchPatients();
+        const queuesData = await fetchQueues();
+
+        const ticketsData = await Promise.all(
+          queuesData.map((q) => fetchTickets(q.queue_id))
+        ).then((arrays) => arrays.flat());
 
         setPatients(patientsData);
         setQueues(queuesData);
@@ -56,7 +52,6 @@ export default function DoctorDashboard() {
     loadData();
   }, []);
 
-  // Derived mock visual data
   const patientGrowthData = useMemo(
     () =>
       Array.from({ length: 7 }, (_, i) => ({
@@ -77,13 +72,13 @@ export default function DoctorDashboard() {
 
   const doctorPerformance = useMemo(
     () =>
-      queues.map((q, i) => ({
+      queues.map((q) => ({
         doctor_name: `Queue ${q.queue_name}`,
-        appointments: Math.floor(Math.random() * 20),
-        status: i % 2 === 0 ? "Active" : "Idle",
-        notes: "Stable queue load",
+        appointments: tickets.filter((t) => t.queue_id === q.queue_id).length,
+        status: q.status === "open" ? "Active" : "Idle",
+        notes: `Max ${q.max_number} patients`,
       })),
-    [queues]
+    [queues, tickets]
   );
 
   const appointmentColumns = useMemo(
