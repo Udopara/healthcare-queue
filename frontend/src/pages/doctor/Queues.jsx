@@ -103,7 +103,7 @@ export default function DoctorQueues() {
 
   useEffect(() => {
     const loadQueues = async () => {
-      if (!user?.clinic_id) {
+      if (!user?.clinic_id || !user?.linked_entity_id) {
         setLoading(false);
         return;
       }
@@ -111,7 +111,23 @@ export default function DoctorQueues() {
       try {
         // Fetch queues filtered by clinic_id
         const data = await fetchQueues(user.clinic_id);
-        setQueues(data);
+        
+        if (!user.linked_entity_id) {
+          toast.error('Unable to identify doctor. Please log out and log back in.');
+          setQueues([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Filter to only show queues created by this doctor
+        // Convert both to numbers for comparison to handle type mismatches
+        const doctorQueues = data.filter((q) => {
+          const queueDoctorId = q.doctor_id != null ? Number(q.doctor_id) : null;
+          const userDoctorId = user.linked_entity_id != null ? Number(user.linked_entity_id) : null;
+          return queueDoctorId === userDoctorId && queueDoctorId !== null;
+        });
+        
+        setQueues(doctorQueues);
       } catch (error) {
         console.error("Error fetching queues:", error);
         toast.error("Failed to load queues");
@@ -120,7 +136,7 @@ export default function DoctorQueues() {
       }
     };
     loadQueues();
-  }, [user?.clinic_id]);
+  }, [user?.clinic_id, user?.linked_entity_id]);
 
   const handleAddQueue = async () => {
     if (!newQueue.trim()) {
@@ -138,8 +154,21 @@ export default function DoctorQueues() {
 
     try {
       const maxNum = maxNumber ? parseInt(maxNumber, 10) : 0;
-      const created = await createQueue(newQueue.trim(), user.clinic_id, maxNum, doctorId);
-      setQueues((prev) => [...prev, created]);
+      await createQueue(newQueue.trim(), user.clinic_id, maxNum, doctorId);
+      
+      // Refetch queues to get updated data with created_by info
+      const data = await fetchQueues(user.clinic_id);
+      
+      // Filter to only show queues created by this doctor
+      // Convert both to numbers for comparison to handle type mismatches
+      const doctorQueues = data.filter((q) => {
+        const queueDoctorId = q.doctor_id != null ? Number(q.doctor_id) : null;
+        const userDoctorId = user.linked_entity_id != null ? Number(user.linked_entity_id) : null;
+        return queueDoctorId === userDoctorId && queueDoctorId !== null;
+      });
+      
+      setQueues(doctorQueues);
+      
       setNewQueue("");
       setMaxNumber("");
       toast.success("Queue created successfully!");

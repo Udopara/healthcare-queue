@@ -182,7 +182,41 @@ export const createQueue = async (req, res) => {
       }
     }
 
-    return res.status(201).json(newQueue);
+    // Format the response to include created_by info (like getAllQueues does)
+    const queueResponse = newQueue.toJSON ? newQueue.toJSON() : newQueue;
+    
+    // Ensure doctor_id is in the response (it should be set if user is a doctor)
+    if (finalDoctorId !== null && finalDoctorId !== undefined) {
+      queueResponse.doctor_id = finalDoctorId;
+    }
+    
+    // Add created_by_name and created_by_role
+    if (queueResponse.doctor_id) {
+      try {
+        const doctor = await Doctor.findByPk(queueResponse.doctor_id, { attributes: ['full_name'] });
+        queueResponse.created_by_name = doctor ? doctor.full_name : 'Unknown Doctor';
+        queueResponse.created_by_role = 'doctor';
+      } catch (err) {
+        console.warn('Error fetching doctor name:', err);
+        queueResponse.created_by_name = 'Unknown Doctor';
+        queueResponse.created_by_role = 'doctor';
+      }
+    } else if (queueResponse.clinic_id) {
+      try {
+        const clinic = await Clinic.findByPk(queueResponse.clinic_id, { attributes: ['clinic_name'] });
+        queueResponse.created_by_name = clinic ? clinic.clinic_name : 'Unknown Clinic';
+        queueResponse.created_by_role = 'clinic';
+      } catch (err) {
+        console.warn('Error fetching clinic name:', err);
+        queueResponse.created_by_name = 'Unknown Clinic';
+        queueResponse.created_by_role = 'clinic';
+      }
+    } else {
+      queueResponse.created_by_name = 'Unknown';
+      queueResponse.created_by_role = 'unknown';
+    }
+
+    return res.status(201).json(queueResponse);
   } catch (error) {
     console.error("Error creating queue:", error);
     console.error("Error details:", {

@@ -23,8 +23,6 @@ import PatientNotFound from '../pages/patient/NotFound'
 import DoctorDashboard from '../pages/doctor/Dashboard'
 import DoctorQueues from '../pages/doctor/Queues'
 import QueueMonitor from '../pages/doctor/QueueMonitor'
-import DoctorAppointments from '../pages/doctor/Appointments'
-import DoctorReports from '../pages/doctor/Reports'
 import DoctorSettings from '../pages/doctor/Settings'
 import DoctorNotFound from '../pages/doctor/NotFound'
 
@@ -94,8 +92,6 @@ export default function RoleBasedRoutes() {
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
       <Route path="/doctor/queues" element={<DoctorQueues />} />
       <Route path="/doctor/queues/:queueId" element={<QueueMonitor />} />
-      <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-      <Route path="/doctor/reports" element={<DoctorReports />} />
       <Route path="/doctor/settings" element={<DoctorSettings />} />
       <Route path="/doctor/*" element={<DoctorNotFound />} />
       <Route path="*" element={<Navigate to={dashboardRoute} replace />} />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import Modal from '../../components/ui/Modal'
+import { useAuth } from '../../context/AuthContext'
 import { 
   getQueueById, 
   getQueueTickets, 
@@ -26,6 +27,7 @@ import {
 export default function QueueMonitor() {
   const { queueId } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [queue, setQueue] = useState(null)
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
@@ -42,6 +44,14 @@ export default function QueueMonitor() {
         getQueueById(queueId),
         getQueueTickets(queueId)
       ])
+      
+      // Verify this queue belongs to the logged-in doctor
+      if (user?.role === 'doctor' && queueData.doctor_id !== user.linked_entity_id) {
+        toast.error('You do not have access to this queue')
+        navigate('/doctor/queues')
+        return
+      }
+      
       setQueue(queueData)
       setTickets(ticketsData || [])
     } catch (error) {

@@ -57,8 +57,6 @@ export default function DashboardLayout({ children }) {
       items: [
         { name: 'Dashboard', href: '/doctor/dashboard', icon: LayoutDashboard },
         { name: 'Queue Monitor', href: '/doctor/queues', icon: ListChecks },
-        { name: 'Appointments', href: '/doctor/appointments', icon: CalendarCheck },
-        { name: 'Reports', href: '/doctor/reports', icon: BarChart },
         { name: 'Settings', href: '/doctor/settings', icon: Settings },
       ]
     },
