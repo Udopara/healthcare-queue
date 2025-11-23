@@ -4,12 +4,14 @@ This repository contains a full-stack healthcare queue management system with a 
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
+Before you begin, ensure you have the following installed and running:
 
 - **Node.js 18+** (required for both frontend and backend)
-- **MySQL 8+** (or compatible database)
+- **MySQL 8+** (or compatible database) - **MySQL server must be running before starting the backend**
 - **A Gmail account and app password** (for sending password reset emails)
 - **Git** (to clone the repository)
+
+**Important:** Make sure your MySQL server is running before attempting to start the backend application. The backend will fail to connect if MySQL is not running.
 
 ### Project Structure
 
@@ -92,20 +94,36 @@ APP_URL=http://localhost:5173
 - `JWT_SECRET` should be a strong, random string in production
 - `APP_URL` is used to build password reset email links
 
-#### 2.3 Create MySQL Database
+#### 2.3 Start MySQL Server
 
-1. Start your MySQL server
-2. Connect to MySQL and create the database:
+**Before proceeding, ensure MySQL is running on your system.**
+
+- **Windows**: Start MySQL from Services or use `net start MySQL`
+- **macOS**: Use `brew services start mysql` or start from System Preferences
+- **Linux**: Use `sudo systemctl start mysql` or `sudo service mysql start`
+
+#### 2.4 Create MySQL Database
+
+1. Connect to MySQL (using MySQL Workbench, command line, or any MySQL client)
+2. Create the database:
 
 ```sql
 CREATE DATABASE healthcare_queue CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-#### 2.4 Initialize Database Schema
+**Note:** If you're using the command line, you can connect with:
+```bash
+mysql -u root -p
+```
+Then enter your MySQL root password when prompted.
+
+#### 2.5 Initialize Database Schema
 
 The database tables will be created automatically when you start the backend server for the first time (Sequelize `sync()` runs on startup).
 
-#### 2.5 (Optional) Seed Demo Data
+**Important:** Make sure MySQL is running and the database exists before starting the backend, otherwise the connection will fail.
+
+#### 2.6 (Optional) Seed Demo Data
 
 After starting the backend at least once, you can seed the database with demo data:
 
@@ -147,6 +165,11 @@ VITE_API_BASE_URL=http://localhost:3000/api
 
 ### Running the Backend
 
+**Before starting the backend, ensure:**
+1. MySQL server is running
+2. The `healthcare_queue` database exists
+3. Your `.env` file is configured correctly
+
 1. Navigate to the backend directory:
    ```bash
    cd backend
@@ -161,6 +184,8 @@ VITE_API_BASE_URL=http://localhost:3000/api
    - **API Base URL**: `http://localhost:3000`
    - **Swagger Documentation**: `http://localhost:3000/api-docs`
    - **Health Check**: `http://localhost:3000/`
+
+**Note:** If you see database connection errors, verify MySQL is running and your database credentials in `.env` are correct.
 
 ### Running the Frontend
 
@@ -203,18 +228,19 @@ This provides complete documentation of all endpoints, request/response schemas,
 Base URL: `http://localhost:3000`
 
 **Authentication:**
-- `POST /api/auth/register/customer` - Register a new customer
-- `POST /api/auth/register/clinic` - Register a new clinic
-- `POST /api/auth/login/customer` - Login as customer
-- `POST /api/auth/login/clinic` - Login as clinic
+- `POST /api/auth/register` - Register a new user (requires `role` field: `patient`, `clinic`, `doctor`, or `admin`)
+- `POST /api/auth/login` - Login user (works for all roles)
+- `GET /api/auth/me` - Get current authenticated user (requires authentication token)
 - `POST /api/auth/password/forgot` - Request password reset
 - `POST /api/auth/password/reset` - Reset password with token
 
 **Resources:**
-- `/api/customers` - Customer management
 - `/api/clinics` - Clinic management
+- `/api/doctors` - Doctor management
+- `/api/patients` - Patient management
 - `/api/queues` - Queue management
 - `/api/tickets` - Ticket management
+- `/api/users` - User management (admin only)
 
 Refer to Swagger UI for complete endpoint documentation, schemas, and examples.
 
@@ -237,19 +263,21 @@ The application supports four main roles:
 
 - **Patient (`patient`)** - Default user role for people joining queues
   - Dashboard: `/patient/dashboard`
-  - Pages: Browse Queue, Join Queue, My Queues, Profile, Help
+  - Pages: Browse Queue, My Queues, Profile, Help
 
-- **Clinic (`clinic`)** - Healthcare facility managing queues
+- **Clinic (`clinic`)** - Healthcare facility managing queues and doctors
   - Dashboard: `/clinic/dashboard`
-  - Pages: Queues, Patients, Reports, Settings
+  - Pages: Queues, Doctors, Reports, Settings
+  - Note: Clinics can view queues created by their doctors but cannot create queues directly
 
 - **Doctor (`doctor`)** - Individual provider working within a clinic
   - Dashboard: `/doctor/dashboard`
-  - Pages: Queues, Appointments, Reports, Settings
+  - Pages: Queue Monitor, Settings
+  - Note: Doctors create and manage their own queues
 
 - **Admin (`admin`)** - System-wide administrator
   - Dashboard: `/admin/dashboard`
-  - Pages: Clinics, Doctors, Users, Patients, Reports, Settings
+  - Pages: Clinics, Manage Users, Patients
 
 ---
 
@@ -259,12 +287,14 @@ The application supports four main roles:
 
 **Backend Issues:**
 
+- **MySQL connection fails**: 
+  - **Most common issue**: MySQL server is not running. Start MySQL before starting the backend.
+  - Verify MySQL is running: Check services (Windows) or use `sudo systemctl status mysql` (Linux)
+  - Check `DB_HOST`, `DB_USER`, `DB_PASS` in `backend/.env` match your MySQL configuration
+  - Ensure the database `healthcare_queue` exists (create it if it doesn't)
+  - Test connection: Try connecting with `mysql -u root -p` using the same credentials
 - **Gmail sending blocked**: Ensure you use a Gmail App Password (not your regular password) and that the account allows SMTP access
 - **JWT errors**: Verify `JWT_SECRET` is set in `backend/.env`
-- **Database connection fails**: 
-  - Verify MySQL is running
-  - Check `DB_HOST`, `DB_USER`, `DB_PASS` in `backend/.env`
-  - Ensure the database `healthcare_queue` exists
 - **Port already in use**: Change `PORT` in `backend/.env` if port 3000 is occupied
 
 **Frontend Issues:**
@@ -348,24 +378,25 @@ The application supports four main roles:
     - `Help` (`/patient/help`)
 
 - **Clinic (`clinic`)**
-  - Represents a healthcare facility managing its own queues.
+  - Represents a healthcare facility managing doctors and viewing queues.
   - After login: redirected to `/clinic/dashboard`.
   - Key pages:
-    - `Dashboard` (`/clinic/dashboard`)
-    - `Queues` (`/clinic/queues`)
-    - `Patients` (`/clinic/patients`)
+    - `Dashboard` (`/clinic/dashboard`) - Overview of doctors, queues, and statistics
+    - `Queues` (`/clinic/queues`) - View all queues created by doctors in the clinic
+    - `Queue View` (`/clinic/queues/:queueId`) - View details of a specific queue
+    - `Doctors` (`/clinic/doctors`) - Manage doctors (create, view)
     - `Reports` (`/clinic/reports`)
     - `Settings` (`/clinic/settings`)
+  - Note: Clinics cannot create queues directly; doctors create queues
 
 - **Doctor (`doctor`)**
   - Represents an individual provider working within a clinic.
-  - Typically created by seeding or via admin tooling.
+  - Can be created by clinics or via admin tooling.
   - After login: redirected to `/doctor/dashboard`.
   - Key pages:
-    - `Dashboard` (`/doctor/dashboard`)
-    - `Queues` (`/doctor/queues`)
-    - `Appointments` (`/doctor/appointments`)
-    - `Reports` (`/doctor/reports`)
+    - `Dashboard` (`/doctor/dashboard`) - View statistics and queue overview
+    - `Queue Monitor` (`/doctor/queues`) - Create and manage queues
+    - `Queue Monitor Detail` (`/doctor/queues/:queueId`) - Monitor specific queue, call next patient, pause/resume/close
     - `Settings` (`/doctor/settings`)
 
 - **Admin (`admin`)**
@@ -374,15 +405,14 @@ The application supports four main roles:
   - Key pages:
     - `Dashboard` (`/admin/dashboard`)
     - `Clinics` (`/admin/clinics`)
-    - `Doctors` (`/admin/doctors`)
-    - `Users` (`/admin/users`)
+    - `Manage Users` (`/admin/users`)
     - `Patients` (`/admin/patients`)
-    - `Reports` (`/admin/reports`)
-    - `Settings` (`/admin/settings`)
 
 #### Registration & login flows
 
-- The frontend registration form calls `POST /api/auth/register` and expects a `role` field (currently focused on **patient** and **clinic** flows).
+- The frontend registration form calls `POST /api/auth/register` and expects a `role` field (`patient`, `clinic`, `doctor`, or `admin`).
+  - For `doctor` role, a `clinicId` must be provided in the registration request.
+  - For other roles, `clinicId` is not required.
 - Login calls `POST /api/auth/login` and stores:
   - `token` – JWT used in the `Authorization` header.
   - `user` – user profile including `role` and `linked_entity_id`.
