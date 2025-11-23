@@ -23,6 +23,11 @@ export default (sequelize) => {
         type: INTEGER,
         allowNull: false,
       },
+      doctor_id: {
+        type: INTEGER,
+        allowNull: true,
+        comment: "ID of the doctor who created this queue (null if created by clinic)",
+      },
       current_ticket_id: {
         type: STRING(20),
         defaultValue: null,

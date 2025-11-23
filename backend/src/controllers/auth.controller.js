@@ -1,18 +1,40 @@
-import { User, PasswordResetToken } from "../models/index.js";
+import { User, PasswordResetToken, Doctor } from "../models/index.js";
 import { createAuthToken, sendPasswordResetEmail } from "../utils/utils.js";
 import crypto from "crypto";
 
 const ALLOWED_ROLES = ["admin", "clinic", "doctor", "patient"];
 
 // Helper to format user data for responses, handles different ID field names
-const buildUserPayload = (user) => ({
-  id: user.user_id ?? user.id,
-  name: user.name,
-  email: user.email,
-  phone_number: user.phone_number,
-  role: user.role,
-  linked_entity_id: user.linked_entity_id,
-});
+// For doctors, also includes clinic_id
+const buildUserPayload = async (user) => {
+  const payload = {
+    id: user.user_id ?? user.id,
+    name: user.name,
+    email: user.email,
+    phone_number: user.phone_number,
+    role: user.role,
+    linked_entity_id: user.linked_entity_id,
+  };
+
+  // If user is a doctor, fetch and include clinic_id
+  if (user.role === "doctor" && user.linked_entity_id) {
+    try {
+      const doctor = await Doctor.findByPk(user.linked_entity_id);
+      if (doctor) {
+        payload.clinic_id = doctor.clinic_id;
+      }
+    } catch (error) {
+      console.error("Error fetching doctor clinic_id:", error);
+    }
+  }
+
+  // If user is a clinic, linked_entity_id is already the clinic_id
+  if (user.role === "clinic" && user.linked_entity_id) {
+    payload.clinic_id = user.linked_entity_id;
+  }
+
+  return payload;
+};
 
 // Handles user registration - doctors need a clinicId, others don't
 export const register = async (req, res) => {
@@ -62,7 +84,7 @@ export const register = async (req, res) => {
 
     const user = await User.findOne({ where: { email } });
 
-    const payload = buildUserPayload(user);
+    const payload = await buildUserPayload(user);
     const token = createAuthToken({
       id: payload.id,
       email: payload.email,
@@ -112,7 +134,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    const payload = buildUserPayload(user);
+    const payload = await buildUserPayload(user);
     const token = createAuthToken({
       id: payload.id,
       email: payload.email,
@@ -235,8 +257,9 @@ export const getCurrentUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const payload = await buildUserPayload(user);
     return res.json({
-      user: buildUserPayload(user),
+      user: payload,
     });
   } catch (error) {
     console.error("Get current user error:", error);

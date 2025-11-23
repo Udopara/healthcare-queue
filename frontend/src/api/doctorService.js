@@ -5,13 +5,19 @@ export const fetchPatients = async () => {
   return res.data;
 };
 
-export const fetchQueues = async () => {
-  const res = await api.get("/queues");
+export const fetchQueues = async (clinicId = null) => {
+  const params = clinicId ? { clinic_id: clinicId } : {};
+  const res = await api.get("/queues", { params });
   return res.data;
 };
 
-export const createQueue = async (queueName) => {
-  const res = await api.post("/queues", { queue_name: queueName });
+export const createQueue = async (queueName, clinicId, maxNumber = 0, doctorId = null) => {
+  const res = await api.post("/queues", { 
+    queue_name: queueName,
+    clinic_id: clinicId,
+    max_number: maxNumber,
+    doctor_id: doctorId // Will be automatically set by backend if user is a doctor
+  });
   return res.data;
 };
 
