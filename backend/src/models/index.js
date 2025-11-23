@@ -32,6 +32,9 @@ const PasswordResetToken = PasswordResetTokenModel(sequelize);
 Clinic.hasMany(Queue, { foreignKey: "clinic_id", onDelete: "CASCADE" });
 Queue.belongsTo(Clinic, { foreignKey: "clinic_id" });
 
+Doctor.hasMany(Queue, { foreignKey: "doctor_id", onDelete: "SET NULL" });
+Queue.belongsTo(Doctor, { foreignKey: "doctor_id" });
+
 Queue.hasMany(Ticket, { foreignKey: "queue_id", onDelete: "CASCADE" });
 Ticket.belongsTo(Queue, { foreignKey: "queue_id" });
 

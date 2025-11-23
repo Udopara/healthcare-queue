@@ -196,7 +196,7 @@ const router = express.Router();
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/", getAllQueues);
+router.get("/", authenticateToken, getAllQueues);
 
 /**
  * @swagger
@@ -223,7 +223,7 @@ router.get("/", getAllQueues);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.get("/:id", getQueueById);
+router.get("/:id", authenticateToken, getQueueById);
 
 /**
  * @swagger
@@ -290,7 +290,7 @@ router.get("/:queue_id/tickets", authenticateToken, getQueueTickets);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.post("/", createQueue);
+router.post("/", authenticateToken, createQueue);
 
 /**
  * @swagger
@@ -323,7 +323,7 @@ router.post("/", createQueue);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.put("/:id", updateQueue);
+router.put("/:id", authenticateToken, updateQueue);
 
 /**
  * @swagger
@@ -350,7 +350,7 @@ router.put("/:id", updateQueue);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.delete("/:id", deleteQueue);
+router.delete("/:id", authenticateToken, deleteQueue);
 
 /**
  * @swagger
@@ -377,6 +377,6 @@ router.delete("/:id", deleteQueue);
  *       500:
  *         $ref: "#/components/responses/ServerError"
  */
-router.post("/:id/call-next", callNextInQueue);
+router.post("/:id/call-next", authenticateToken, callNextInQueue);
 
 export default router;

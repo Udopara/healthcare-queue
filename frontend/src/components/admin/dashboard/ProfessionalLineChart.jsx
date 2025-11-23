@@ -19,9 +19,9 @@ export default function ProfessionalLineChart({ data, title, dataKey, color = PR
   const maxValue = Math.max(...data.map(d => d[dataKey] || 0));
   const minValue = Math.min(...data.map(d => d[dataKey] || 0));
   const range = maxValue - minValue || 1;
-  const chartHeight = 200;
+  const chartHeight = 350; // Increased from 200
   const chartWidth = 1000;
-  const padding = { top: 20, right: 40, bottom: 40, left: 60 };
+  const padding = { top: 30, right: 50, bottom: 50, left: 70 }; // Increased padding
 
   // Calculate points for the line
   const points = data.map((d, idx) => {
@@ -83,7 +83,7 @@ export default function ProfessionalLineChart({ data, title, dataKey, color = PR
     <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
       <h3 className="text-lg font-bold text-gray-900 mb-6">{title}</h3>
       <div className="w-full overflow-x-auto relative">
-        <svg viewBox={`0 0 ${chartWidth} ${chartHeight + padding.top + padding.bottom}`} className="w-full" style={{ minHeight: '280px' }}>
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight + padding.top + padding.bottom}`} className="w-full" style={{ minHeight: '430px' }}>
           {/* Grid lines */}
           {yAxisLabels.map((label, idx) => (
             <line

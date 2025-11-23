@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
@@ -31,7 +30,10 @@ app.use(express.json());
   try {
     await sequelize.authenticate();
     console.log("DB connected");
-    await sequelize.sync();
+    // Use alter: true to add new columns to existing tables
+    // WARNING: This can cause data loss in production, use migrations in production
+    await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
+    console.log("✅ Database schema synced");
   } catch (err) {
     console.error("DB connection failed:", err);
   }
@@ -70,6 +72,14 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+import cors from "cors";
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+
 
 app.use("/api/patients", patientRoutes);
 app.use("/api/clinics", clinicRoutes);
