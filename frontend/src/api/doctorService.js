@@ -26,6 +26,16 @@ export const getQueueById = async (id) => {
   return res.data;
 };
 
+export const getQueueTickets = async (queueId) => {
+  const res = await api.get(`/queues/${queueId}/tickets`);
+  return res.data;
+};
+
+export const updateQueueStatus = async (queueId, status) => {
+  const res = await api.put(`/queues/${queueId}`, { status });
+  return res.data;
+};
+
 export const updateQueue = async (id, updates) => {
   const res = await api.put(`/queues/${id}`, updates);
   return res.data;
@@ -36,8 +46,8 @@ export const deleteQueue = async (id) => {
   return res.data;
 };
 
-export const callNextPatient = async (id) => {
-  const res = await api.post(`/queues/${id}/call-next`);
+export const callNextPatient = async (queueId) => {
+  const res = await api.post(`/queues/${queueId}/call-next`);
   return res.data;
 };
 

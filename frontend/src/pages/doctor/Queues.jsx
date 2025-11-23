@@ -1,20 +1,55 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import SimpleTable from "../../components/admin/dashboard/SimpleTable";
 import { fetchQueues, createQueue } from "../../api/doctorService";
 import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
+import { Eye } from "lucide-react";
 
 export default function DoctorQueues() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [queues, setQueues] = useState([]);
   const [newQueue, setNewQueue] = useState("");
   const [maxNumber, setMaxNumber] = useState("");
   const [loading, setLoading] = useState(true);
 
   const columns = useMemo(() => [
-    { accessorKey: "queue_name", header: "Queue Name" },
-    { accessorKey: "status", header: "Status" },
+    { 
+      accessorKey: "queue_name", 
+      header: "Queue Name",
+      cell: ({ row }) => {
+        const queueName = row.original.queue_name;
+        const queueId = row.original.queue_id;
+        return (
+          <button
+            onClick={() => navigate(`/doctor/queues/${queueId}`)}
+            className="text-indigo-600 hover:text-indigo-700 font-medium hover:underline transition-colors"
+          >
+            {queueName}
+          </button>
+        );
+      }
+    },
+    { 
+      accessorKey: "status", 
+      header: "Status",
+      cell: ({ getValue }) => {
+        const status = getValue();
+        const statusConfig = {
+          open: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200', label: 'Open' },
+          paused: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200', label: 'Paused' },
+          closed: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200', label: 'Closed' }
+        };
+        const config = statusConfig[status] || statusConfig.open;
+        return (
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${config.bg} ${config.text} ${config.border}`}>
+            {config.label}
+          </span>
+        );
+      }
+    },
     { 
       accessorKey: "created_by_name", 
       header: "Created By",
@@ -48,8 +83,23 @@ export default function DoctorQueues() {
         );
       }
     },
-    { accessorKey: "created_at", header: "Created At" },
-  ], []);
+    { 
+      accessorKey: "queue_id", 
+      header: "Actions",
+      cell: ({ row }) => {
+        const queueId = row.original.queue_id;
+        return (
+          <button
+            onClick={() => navigate(`/doctor/queues/${queueId}`)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            Monitor
+          </button>
+        );
+      }
+    },
+  ], [navigate]);
 
   useEffect(() => {
     const loadQueues = async () => {
