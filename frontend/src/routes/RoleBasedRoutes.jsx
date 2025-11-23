@@ -30,10 +30,7 @@ import DoctorNotFound from '../pages/doctor/NotFound'
 // Admin Pages
 import AdminDashboard from '../pages/admin/Dashboard'
 import AdminClinics from '../pages/admin/Clinics'
-import AdminDoctors from '../pages/admin/Doctors'
 import AdminPatients from '../pages/admin/Patients'
-import AdminReports from '../pages/admin/Reports'
-import AdminSettings from '../pages/admin/Settings'
 import AdminManageUsers from '../pages/admin/ManageUsers'
 import AdminNotFound from '../pages/admin/NotFound'
 
@@ -107,11 +104,8 @@ export default function RoleBasedRoutes() {
       <Routes>
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/clinics" element={<AdminClinics />} />
-        <Route path="/admin/doctors" element={<AdminDoctors />} />
         <Route path="/admin/users" element={<AdminManageUsers />} />
         <Route path="/admin/patients" element={<AdminPatients />} />
-        <Route path="/admin/reports" element={<AdminReports />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/*" element={<AdminNotFound />} />
         <Route path="*" element={<Navigate to={dashboardRoute} replace />} />
       </Routes>
