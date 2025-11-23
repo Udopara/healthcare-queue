@@ -179,7 +179,7 @@ export const requestPasswordReset = async (req, res) => {
       expires_at: expiresAt,
     });
 
-    const appUrl = process.env.APP_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+    const appUrl = process.env.APP_URL || process.env.FRONTEND_URL || "http://localhost:5173";
     const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
     try {
