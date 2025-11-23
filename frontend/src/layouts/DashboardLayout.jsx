@@ -3,11 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   LayoutDashboard, 
   ListChecks,
-  PlusCircle,
   Users,
   BarChart,
   Settings,
-  HelpCircle,
   CalendarCheck,
   Building2,
   Stethoscope,
@@ -45,10 +43,7 @@ export default function DashboardLayout({ children }) {
       items: [
         { name: 'Dashboard', href: '/patient/dashboard', icon: LayoutDashboard },
         { name: 'Browse Queue', href: '/patient/browse', icon: Search },
-        { name: 'Join Queue', href: '/patient/join', icon: PlusCircle },
         { name: 'My Queues', href: '/patient/my-queues', icon: ListChecks },
-        { name: 'Profile', href: '/patient/profile', icon: User },
-        { name: 'Help', href: '/patient/help', icon: HelpCircle },
       ]
     },
     doctor: {
@@ -57,8 +52,6 @@ export default function DashboardLayout({ children }) {
       items: [
         { name: 'Dashboard', href: '/doctor/dashboard', icon: LayoutDashboard },
         { name: 'Queue Monitor', href: '/doctor/queues', icon: ListChecks },
-        { name: 'Appointments', href: '/doctor/appointments', icon: CalendarCheck },
-        { name: 'Reports', href: '/doctor/reports', icon: BarChart },
         { name: 'Settings', href: '/doctor/settings', icon: Settings },
       ]
     },
@@ -68,10 +61,8 @@ export default function DashboardLayout({ children }) {
       items: [
         { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Clinics', href: '/admin/clinics', icon: Building2 },
-        { name: 'Doctors', href: '/admin/doctors', icon: Stethoscope },
         { name: 'Manage Users', href: '/admin/users', icon: Users },
-        { name: 'Reports', href: '/admin/reports', icon: BarChart },
-        { name: 'System Settings', href: '/admin/settings', icon: Settings },
+        { name: 'Patients', href: '/admin/patients', icon: Users },
       ]
     }
   }

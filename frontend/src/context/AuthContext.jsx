@@ -32,7 +32,8 @@ export const AuthProvider = ({ children }) => {
               email: response.user.email,
               phone_number: response.user.phone_number,
               role: response.user.role,
-              linked_entity_id: response.user.linked_entity_id
+              linked_entity_id: response.user.linked_entity_id,
+              clinic_id: response.user.clinic_id || null // Include clinic_id for doctors and clinics
             }
             console.log('🔐 AuthContext: Setting user data:', userData)
             
@@ -81,7 +82,8 @@ export const AuthProvider = ({ children }) => {
         email: response.user.email,
         phone_number: response.user.phone_number,
         role: response.user.role,
-        linked_entity_id: response.user.linked_entity_id
+        linked_entity_id: response.user.linked_entity_id,
+        clinic_id: response.user.clinic_id || null // Include clinic_id for doctors and clinics
       }
       
       setAuth(response.token, userData)
@@ -104,7 +106,8 @@ export const AuthProvider = ({ children }) => {
         email: response.user.email,
         phone_number: response.user.phone_number,
         role: response.user.role,
-        linked_entity_id: response.user.linked_entity_id
+        linked_entity_id: response.user.linked_entity_id,
+        clinic_id: response.user.clinic_id || null // Include clinic_id for doctors and clinics
       }
       
       setAuth(response.token, user)
@@ -153,7 +156,8 @@ export const AuthProvider = ({ children }) => {
           email: response.user.email,
           phone_number: response.user.phone_number,
           role: response.user.role,
-          linked_entity_id: response.user.linked_entity_id
+          linked_entity_id: response.user.linked_entity_id,
+          clinic_id: response.user.clinic_id || null // Include clinic_id for doctors and clinics
         }
         setAuth(token, userData)
         setUser(userData)

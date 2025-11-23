@@ -30,7 +30,10 @@ app.use(express.json());
   try {
     await sequelize.authenticate();
     console.log("DB connected");
-    await sequelize.sync();
+    // Use alter: true to add new columns to existing tables
+    // WARNING: This can cause data loss in production, use migrations in production
+    await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
+    console.log("✅ Database schema synced");
   } catch (err) {
     console.error("DB connection failed:", err);
   }
