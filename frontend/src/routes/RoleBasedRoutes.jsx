@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 // Clinic Pages
 import ClinicDashboard from "../pages/clinic/ClinicDashboard";
 import ClinicQueues from '../pages/clinic/Queues'
+import QueueView from '../pages/clinic/QueueView'
 import ClinicDoctors from '../pages/clinic/ClinicDoctors'
 import ClinicReports from '../pages/clinic/ClinicReports'
 import ClinicSettings from '../pages/clinic/RecentActivity'
@@ -61,6 +62,7 @@ export default function RoleBasedRoutes() {
       <Routes>
         <Route path="/clinic/dashboard" element={<ClinicDashboard />} />
         <Route path="/clinic/queues" element={<ClinicQueues />} />
+        <Route path="/clinic/queues/:queueId" element={<QueueView />} />
         <Route path="/clinic/doctors" element={<ClinicDoctors />} />
         <Route path="/clinic/reports" element={<ClinicReports />} />
         <Route path="/clinic/settings" element={<ClinicSettings />} />
