@@ -3,11 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   LayoutDashboard, 
   ListChecks,
-  PlusCircle,
   Users,
   BarChart,
   Settings,
-  HelpCircle,
   CalendarCheck,
   Building2,
   Stethoscope,
@@ -45,10 +43,7 @@ export default function DashboardLayout({ children }) {
       items: [
         { name: 'Dashboard', href: '/patient/dashboard', icon: LayoutDashboard },
         { name: 'Browse Queue', href: '/patient/browse', icon: Search },
-        { name: 'Join Queue', href: '/patient/join', icon: PlusCircle },
         { name: 'My Queues', href: '/patient/my-queues', icon: ListChecks },
-        { name: 'Profile', href: '/patient/profile', icon: User },
-        { name: 'Help', href: '/patient/help', icon: HelpCircle },
       ]
     },
     doctor: {

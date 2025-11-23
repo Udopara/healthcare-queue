@@ -274,10 +274,12 @@ export const updateQueue = async (req, res) => {
   }
 };
 
-// Returns all tickets for a specific queue - only doctors, clinics, and admins can access
+// Returns all tickets for a specific queue
+// Doctors, clinics, and admins can access all tickets
+// Patients can access to calculate their position in the queue
 export const getQueueTickets = async (req, res) => {
   const {role} = req.user;
-  if (!["doctor", "clinic", "admin"].includes(role)) {
+  if (!["doctor", "clinic", "admin", "patient"].includes(role)) {
     return res
       .status(403)
       .json({ message: "Access denied. Insufficient permissions." });
