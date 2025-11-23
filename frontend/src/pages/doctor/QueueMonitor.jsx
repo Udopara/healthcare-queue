@@ -46,10 +46,31 @@ export default function QueueMonitor() {
       ])
       
       // Verify this queue belongs to the logged-in doctor
-      if (user?.role === 'doctor' && queueData.doctor_id !== user.linked_entity_id) {
-        toast.error('You do not have access to this queue')
-        navigate('/doctor/queues')
-        return
+      // Handle type mismatches (string vs number) by converting both to numbers
+      if (user?.role === 'doctor') {
+        const queueDoctorId = queueData.doctor_id != null ? Number(queueData.doctor_id) : null;
+        const userDoctorId = user.linked_entity_id != null ? Number(user.linked_entity_id) : null;
+        
+        // If queue has no doctor_id, deny access (queue wasn't created by a doctor)
+        if (queueDoctorId === null) {
+          toast.error('This queue was not created by a doctor')
+          navigate('/doctor/queues')
+          return
+        }
+        
+        // If user has no linked_entity_id, deny access
+        if (userDoctorId === null) {
+          toast.error('Unable to verify doctor identity')
+          navigate('/doctor/queues')
+          return
+        }
+        
+        // Check if the queue belongs to this doctor
+        if (queueDoctorId !== userDoctorId) {
+          toast.error('You do not have access to this queue')
+          navigate('/doctor/queues')
+          return
+        }
       }
       
       setQueue(queueData)
